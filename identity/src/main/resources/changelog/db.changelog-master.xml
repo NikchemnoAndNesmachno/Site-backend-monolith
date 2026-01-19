@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <include file="/db/changelog/logs/001_extensions.xml"/>
+    <include file="/db/changelog/logs/010-create-users.xml"/>
+    <include file="/db/changelog/logs/020_credentials.xml"/>
+    <include file="/db/changelog/logs/030_profiles.xml"/>
+    <include file="/db/changelog/logs/050_refresh_tokens.xml"/>
+    <include file="/db/changelog/logs/060_email_verification_tokens.xml"/>
+    <include file="/db/changelog/logs/070_password_reset_tokens.xml"/>
+
+</databaseChangeLog>
+

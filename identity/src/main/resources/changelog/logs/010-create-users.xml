@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="010-create-authentication-schema" author="Lain (Ivan)">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS authentication;
+        </sql>
+
+        <rollback>
+            <sql>
+                DROP SCHEMA authentication;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="010-create-users" author="Lain (Ivan)">
+        <comment>Застосування розширення pgcrypto для створення uuid4 на стороні БД.</comment>
+
+        <createTable tableName="users" schemaName="authentication">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="email" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="status" type="varchar(32)" defaultValue="PENDING_EMAIL">
+                <constraints nullable="false"
+                             checkConstraint="status IN ('ACTIVE', 'PENDING_EMAIL', 'BANNED', 'DELETED')"/>
+            </column>
+
+            <column name="role" type="varchar(32)" defaultValue="USER">
+                <constraints nullable="false"
+                             checkConstraint="role IN ('USER', 'ADMIN')"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_login_at" type="timestamptz"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="users" schemaName="authentication"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="011" author="Lain (Ivan)">
+        <comment>Створення індексу по статусу юзерів.</comment>
+
+        <createIndex tableName="users" indexName="idx_users_status" schemaName="authentication">
+            <column name="status"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="users" indexName="idx_users_status"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

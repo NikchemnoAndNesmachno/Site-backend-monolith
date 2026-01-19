@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="050-create-refresh-tokens" author="Lain (Ivan)">
+        <createTable tableName="refresh_tokens" schemaName="authentication">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="token_hash" type="varchar(255)">
+                <constraints nullable="false"
+                             unique="true"/>
+            </column>
+
+            <column name="family_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="issued_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="expires_at" type="timestamptz">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="revoked_at" type="timestamptz"/>
+
+            <column name="replaced_by" type="BIGINT"/>
+        </createTable>
+
+        <sql>
+            ALTER TABLE authentication.refresh_tokens
+                ADD CONSTRAINT chk_refresh_tokens_exp
+                    CHECK (expires_at > issued_at);
+        </sql>
+
+        <addForeignKeyConstraint
+                baseTableSchemaName="authentication"
+                baseTableName="refresh_tokens"
+                baseColumnNames="user_id"
+                referencedTableSchemaName="authentication"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_refresh_tokens_user"
+                onDelete="CASCADE"/>
+
+<!--        <addForeignKeyConstraint-->
+<!--                baseTableSchemaName="authentication"-->
+<!--                baseTableName="refresh_tokens"-->
+<!--                baseColumnNames="family_id"-->
+<!--                referencedTableSchemaName="authentication"-->
+<!--                referencedTableName="refresh_token_families"-->
+<!--                referencedColumnNames="id"-->
+<!--                constraintName="fk_refresh_tokens_family"-->
+<!--                onDelete="CASCADE"/>-->
+
+        <addForeignKeyConstraint
+                baseTableSchemaName="authentication"
+                baseTableName="refresh_tokens"
+                baseColumnNames="family_id,user_id"
+                referencedTableSchemaName="authentication"
+                referencedTableName="refresh_token_families"
+                referencedColumnNames="id,user_id"
+                constraintName="fk_refresh_tokens_family_user"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableSchemaName="authentication"
+                baseTableName="refresh_tokens"
+                baseColumnNames="replaced_by"
+                referencedTableSchemaName="authentication"
+                referencedTableName="refresh_tokens"
+                referencedColumnNames="id"
+                constraintName="fk_refresh_tokens_replaced_by"
+                onDelete="SET NULL"/>
+
+        <rollback>
+            <dropTable tableName="refresh_tokens" schemaName="authentication"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="051" author="Lain (Ivan)">
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_user_id" schemaName="authentication">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_family_id" schemaName="authentication">
+            <column name="family_id"/>
+        </createIndex>
+
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_expires_at" schemaName="authentication">
+            <column name="expires_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_user_id" schemaName="authentication"/>
+            <dropIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_family_id" schemaName="authentication"/>
+            <dropIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_expires_at" schemaName="authentication"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
