@@ -28,3 +28,6 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+
+jwt:
+  secret: "dev-secret-change-me"

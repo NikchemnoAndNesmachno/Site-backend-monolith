@@ -60,8 +60,8 @@
         </createIndex>
 
         <rollback>
-            <dropIndex tableName="refresh_tokens" indexName="idx_refresh_token_families_user_id" schemaName="authentication"/>
-            <dropIndex tableName="refresh_tokens" indexName="idx_refresh_token_families_revoked_at" schemaName="authentication"/>
+            <dropIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_user_id" schemaName="authentication"/>
+            <dropIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_revoked_at" schemaName="authentication"/>
         </rollback>
     </changeSet>
 
