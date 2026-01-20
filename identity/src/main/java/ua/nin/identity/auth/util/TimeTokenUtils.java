@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -29,6 +28,10 @@ public class TimeTokenUtils {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(buf);
     }
 
+    /*
+    Hash:
+    SHA-256(raw + serverPepper) або HMAC-SHA256.
+     */
     public String hash(String raw) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
