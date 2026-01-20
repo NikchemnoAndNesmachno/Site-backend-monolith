@@ -30,4 +30,10 @@ spring:
             non_contextual_creation: true
 
 jwt:
-  secret: "dev-secret-change-me"
+  secret: "dev-secret-change-measdasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+
+security:
+  refresh:
+    ttl-days: 14
+    bytes: 64
+    pepper: "CHANGE_ME_LONG_RANDOM"

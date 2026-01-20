@@ -19,7 +19,7 @@
 
     <changeSet id="030-create-profiles" author="Lain (Ivan)">
         <createTable tableName="profiles" schemaName="profile">
-            <column name="user_id" type="BIGINT" autoIncrement="true">
+            <column name="user_id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
 

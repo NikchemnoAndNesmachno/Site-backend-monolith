@@ -59,9 +59,15 @@
             <column name="revoked_at"/>
         </createIndex>
 
+        <createIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_id_user_id" schemaName="authentication">
+            <column name="id"/>
+            <column name="user_id"/>
+        </createIndex>
+
         <rollback>
             <dropIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_user_id" schemaName="authentication"/>
             <dropIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_revoked_at" schemaName="authentication"/>
+            <dropIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_id_user_id" schemaName="authentication"/>
         </rollback>
     </changeSet>
 

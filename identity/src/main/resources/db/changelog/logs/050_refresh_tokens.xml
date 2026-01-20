@@ -101,10 +101,21 @@
             <column name="expires_at"/>
         </createIndex>
 
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_family_id_user_id" schemaName="authentication">
+            <column name="family_id"/>
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_token_hash" schemaName="authentication">
+            <column name="token_hash"/>
+        </createIndex>
+
         <rollback>
             <dropIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_user_id" schemaName="authentication"/>
             <dropIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_family_id" schemaName="authentication"/>
             <dropIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_expires_at" schemaName="authentication"/>
+            <dropIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_family_id_user_id" schemaName="authentication"/>
+            <dropIndex tableName="refresh_tokens" indexName="idx_refresh_tokens_token_hash" schemaName="authentication"/>
         </rollback>
     </changeSet>
 
