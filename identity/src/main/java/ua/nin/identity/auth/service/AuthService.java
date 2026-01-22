@@ -17,13 +17,13 @@ import ua.nin.identity.auth.model.Status;
 import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.UserRepository;
-import ua.nin.identity.auth.util.EmailUtils;
+import ua.nin.identity.auth.util.StringHelperUtils;
 import ua.nin.identity.auth.util.SecurityUtils;
 import ua.nin.identity.profile.model.Privacy;
 import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
 
-import static ua.nin.identity.auth.util.EmailUtils.normalizeEmail;
+import static ua.nin.identity.auth.util.StringHelperUtils.normalizeEmail;
 
 import java.time.Instant;
 import java.util.List;
@@ -48,7 +48,7 @@ public class AuthService {
     // ---------------- REGISTER ----------------
     @Transactional
     public void register(@Valid RegisterRequest req) {
-        String email = EmailUtils.normalizeEmail(req.email());
+        String email = StringHelperUtils.normalizeEmail(req.email());
         String username = req.username().trim();
 
         if (userRepository.existsByEmail(email)) {

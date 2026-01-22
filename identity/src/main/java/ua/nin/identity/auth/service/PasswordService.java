@@ -14,7 +14,7 @@ import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.PasswordResetTokenRepository;
 import ua.nin.identity.auth.repository.UserRepository;
-import ua.nin.identity.auth.util.EmailUtils;
+import ua.nin.identity.auth.util.StringHelperUtils;
 import ua.nin.identity.auth.util.SecurityUtils;
 import ua.nin.identity.auth.util.TimeTokenUtils;
 
@@ -45,7 +45,7 @@ public class PasswordService {
      */
     @Transactional
     public void forgot(String email) {
-        String normalized = EmailUtils.normalizeEmail(email);
+        String normalized = StringHelperUtils.normalizeEmail(email);
         if (normalized == null) return;
 
         Optional<User> userOpt = userRepository.findByEmail(normalized);

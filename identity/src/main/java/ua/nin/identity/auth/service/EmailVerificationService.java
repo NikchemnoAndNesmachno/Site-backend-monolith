@@ -10,7 +10,7 @@ import ua.nin.identity.auth.model.Status;
 import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.EmailVerificationTokenRepository;
 import ua.nin.identity.auth.repository.UserRepository;
-import ua.nin.identity.auth.util.EmailUtils;
+import ua.nin.identity.auth.util.StringHelperUtils;
 import ua.nin.identity.auth.util.TimeTokenUtils;
 
 import java.time.Instant;
@@ -71,7 +71,7 @@ public class EmailVerificationService {
     public void send(User user) {
         String email = user.getEmail();
 
-        String normalized = EmailUtils.normalizeEmail(email);
+        String normalized = StringHelperUtils.normalizeEmail(email);
         if (normalized == null) return;
 
         String raw = timeTokenUtils.generateRawToken();
@@ -99,7 +99,7 @@ public class EmailVerificationService {
      */
     @Transactional
     public void resend(String email) {
-        String normalized = EmailUtils.normalizeEmail(email);
+        String normalized = StringHelperUtils.normalizeEmail(email);
         if (normalized == null) return;
 
         Optional<User> userOpt = userRepository.findByEmail(normalized);
