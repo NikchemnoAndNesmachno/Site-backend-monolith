@@ -49,8 +49,10 @@ public class RefreshTokenFamily {
     /**
      * Postgres inet
      */
-    @Type(PostgreSQLInetType.class)
-    @Column(name="ip", columnDefinition="inet")
+//    @Type(PostgreSQLInetType.class)
+//    @Column(name="ip", columnDefinition="inet")
+//    private InetAddress ip;
+    @Column(name = "ip", columnDefinition = "inet")
     private InetAddress ip;
 
 //    @OneToMany(mappedBy = "family", fetch = FetchType.LAZY)

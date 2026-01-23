@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import ua.nin.identity.auth.model.User;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -37,7 +37,7 @@ public class Profile {
     @Column(name = "bio")
     private String bio;
 
-    @Column(name = "privacy")
+    @Column(name="privacy", nullable=false)
     @Enumerated(EnumType.STRING)
     private Privacy privacy;
 
@@ -48,19 +48,19 @@ public class Profile {
     private String timezone;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = Instant.now();
     }
 }

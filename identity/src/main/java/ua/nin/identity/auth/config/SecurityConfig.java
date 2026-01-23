@@ -11,18 +11,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -66,17 +59,17 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // --- Protected endpoints ---
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout-all").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout-all").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
                         // logout можна дозволити без access — бо revoke робиться по refresh cookie
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/password/change").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/password/change").hasAnyRole("USER", "ADMIN")
 
-                        .requestMatchers("/api/v1/auth/sessions/**").authenticated()
+                        .requestMatchers("/api/v1/auth/sessions/**").hasAnyRole("USER", "ADMIN")
 
                         // все інше — за замовчуванням закрите
-                        .anyRequest().authenticated()
+                        .anyRequest().hasAnyRole("USER", "ADMIN")
                 )
                 // JWT access token validation
                 .oauth2ResourceServer(oauth2 -> oauth2

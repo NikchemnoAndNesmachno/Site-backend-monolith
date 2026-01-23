@@ -22,6 +22,7 @@ public final class StringHelperUtils {
 
     public static String normalizeAndTruncate(String s, int maxLength) {
         String t = trimToNull(trimToNull(s));
+        if (t == null) return null;
         return t.length() <= maxLength ? t : t.substring(0, maxLength);
     }
 }
