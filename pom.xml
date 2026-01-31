@@ -30,11 +30,14 @@
     </developers>
 
     <modules>
+        <module>app</module>
+        <module>common</module>
+        <module>contract-api</module>
         <module>identity</module>
-        <!-- <module>media</module> -->
-        <!-- <module>reactions</module> -->
-        <!-- <module>contracts</module> -->
-        <!-- <module>app</module> -->
+        <module>media</module>
+        <module>reactions</module>
+        <module>comments</module>
+        <module>views</module>
     </modules>
 
     <properties>
