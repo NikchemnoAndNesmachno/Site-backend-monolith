@@ -14,7 +14,7 @@ import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.PasswordResetTokenRepository;
 import ua.nin.identity.auth.repository.UserRepository;
-import ua.nin.identity.auth.util.StringHelperUtils;
+import ua.nin.common.util.StringHelperUtils;
 import ua.nin.identity.auth.util.SecurityUtils;
 import ua.nin.identity.auth.util.TimeTokenUtils;
 
