@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="010-create-reaction-types" author="Lain (Ivan)">
+        <createTable tableName="reaction_types" schemaName="reactions">
+            <column name="code" type="varchar(32)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="weight" type="smallint" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- seed базових реакцій -->
+        <insert schemaName="reactions" tableName="reaction_types">
+            <column name="code" value="LIKE"/>
+            <column name="weight" valueNumeric="1"/>
+        </insert>
+
+        <insert schemaName="reactions" tableName="reaction_types">
+            <column name="code" value="DISLIKE"/>
+            <column name="weight" valueNumeric="1"/>
+        </insert>
+
+        <rollback>
+            <delete schemaName="reactions" tableName="reaction_types">
+                <where>code in ('LIKE','DISLIKE')</where>
+            </delete>
+            <dropTable schemaName="reactions" tableName="reaction_types"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

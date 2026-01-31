@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="082-create-reactions" author="Lain (Ivan)">
+        <createTable tableName="reactions" schemaName="reactions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="target_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="target_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="reaction_code" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="revoked_at" type="timestamptz">
+                <constraints checkConstraint="revoked_at IS NULL OR revoked_at >= created_at"/>
+            </column>
+        </createTable>
+
+        <!-- FK на users -->
+        <addForeignKeyConstraint
+                baseTableSchemaName="reactions"
+                baseTableName="reactions"
+                baseColumnNames="user_id"
+                referencedTableSchemaName="authentication"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_reactions_user"
+                onDelete="CASCADE"/>
+
+        <!-- FK на reaction_types -->
+        <addForeignKeyConstraint
+                baseTableSchemaName="reactions"
+                baseTableName="reactions"
+                baseColumnNames="reaction_code"
+                referencedTableSchemaName="reactions"
+                referencedTableName="reaction_types"
+                referencedColumnNames="code"
+                constraintName="fk_reactions_reaction_type"
+                onDelete="RESTRICT"/>
+
+        <!-- одна реакція на ціль від користувача -->
+        <addUniqueConstraint
+                schemaName="reactions"
+                tableName="reactions"
+                columnNames="user_id,target_type,target_id"
+                constraintName="uq_reactions_user_target"/>
+
+        <rollback>
+            <dropTable schemaName="reactions" tableName="reactions"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="083-reactions-indexes" author="Lain (Ivan)">
+        <!-- мої реакції -->
+        <createIndex schemaName="reactions" tableName="reactions" indexName="idx_reactions_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <!-- лічильники по цілі + типу -->
+        <createIndex schemaName="reactions" tableName="reactions" indexName="idx_reactions_target_type_id">
+            <column name="target_type"/>
+            <column name="target_id"/>
+        </createIndex>
+
+        <comment>Швидкі count(*) по реакціям</comment>
+        <sql>
+            CREATE INDEX IF NOT EXISTS idx_reactions_active_target_reaction
+                ON reactions.reactions (target_type, target_id, reaction_code)
+                WHERE revoked_at IS NULL;
+        </sql>
+
+        <!-- вибірки “активних” реакцій -->
+        <createIndex schemaName="reactions" tableName="reactions" indexName="idx_reactions_revoked_at">
+            <column name="revoked_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex schemaName="reactions" tableName="reactions" indexName="idx_reactions_user_id"/>
+            <dropIndex schemaName="reactions" tableName="reactions" indexName="idx_reactions_target_type_id"/>
+            <dropIndex schemaName="reactions" tableName="reactions" indexName="idx_reactions_target_reaction"/>
+            <dropIndex schemaName="reactions" tableName="reactions" indexName="idx_reactions_revoked_at"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
