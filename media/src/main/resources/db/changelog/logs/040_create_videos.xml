@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="040-create-videos" author="Lain (Ivan)">
+        <createTable tableName="videos" schemaName="media">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="owner_user_id" type="BIGINT"/>
+
+            <column name="media_bundle_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="description" type="text"/>
+
+            <column name="visibility" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="status" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- 1:1 (один bundle належить одному video) -->
+        <addUniqueConstraint
+                schemaName="media"
+                tableName="videos"
+                columnNames="media_bundle_id"
+                constraintName="uq_videos_media_bundle"/>
+
+        <!-- власник -->
+        <addForeignKeyConstraint
+                baseTableSchemaName="media"
+                baseTableName="videos"
+                baseColumnNames="owner_user_id"
+                referencedTableSchemaName="authentication"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_videos_owner"
+                onDelete="SET NULL"/>
+
+        <!-- bundle: якщо хтось видалить bundle, video теж повинен зникнути (інакше буде зламаний контент) -->
+        <addForeignKeyConstraint
+                baseTableSchemaName="media"
+                baseTableName="videos"
+                baseColumnNames="media_bundle_id"
+                referencedTableSchemaName="media"
+                referencedTableName="media_bundles"
+                referencedColumnNames="id"
+                constraintName="fk_videos_bundle"
+                onDelete="CASCADE"/>
+
+        <rollback>
+            <dropTable tableName="videos" schemaName="media"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="041-create-videos-indexes" author="Lain (Ivan)">
+        <createIndex tableName="videos" schemaName="media" indexName="idx_videos_owner">
+            <column name="owner_user_id"/>
+        </createIndex>
+
+        <createIndex tableName="videos" schemaName="media" indexName="idx_videos_created_at">
+            <column name="created_at"/>
+        </createIndex>
+
+        <!-- частий фільтр у стрічці -->
+        <createIndex tableName="videos" schemaName="media" indexName="idx_videos_visibility_status">
+            <column name="visibility"/>
+            <column name="status"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="videos" schemaName="media" indexName="idx_videos_owner"/>
+            <dropIndex tableName="videos" schemaName="media" indexName="idx_videos_created_at"/>
+            <dropIndex tableName="videos" schemaName="media" indexName="idx_videos_visibility_status"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
