@@ -30,7 +30,7 @@ public class AuthController {
                                               HttpServletRequest request,
                                               HttpServletResponse response,
                                               @RequestHeader(value = "User-Agent", required = false) String userAgent) {
-        var result = authService.login(req, userAgent, request.getRemoteAddr());
+        AuthResult result = authService.login(req, userAgent, request.getRemoteAddr());
         cookieService.setRefreshCookie(response, result.refreshToken()); // HttpOnly cookie
         return ResponseEntity.ok(result.authResponse()); // access в JSON
     }
@@ -40,7 +40,7 @@ public class AuthController {
                                                 HttpServletRequest request,
                                                 HttpServletResponse response,
                                                 @RequestHeader(value = "User-Agent", required = false) String userAgent) {
-        var result = authService.refresh(refreshToken, userAgent, request.getRemoteAddr());
+        AuthResult result = authService.refresh(refreshToken, userAgent, request.getRemoteAddr());
         cookieService.setRefreshCookie(response, result.refreshToken()); // rotation
         return ResponseEntity.ok(result.authResponse());
     }

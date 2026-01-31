@@ -12,8 +12,8 @@ import ua.nin.identity.profile.model.Privacy;
 import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
 
-import static ua.nin.identity.auth.util.StringHelperUtils.normalizeAndTruncate;
-import static ua.nin.identity.auth.util.StringHelperUtils.normalizeUsername;
+import static ua.nin.common.util.StringHelperUtils.normalizeAndTruncate;
+import static ua.nin.common.util.StringHelperUtils.normalizeUsername;
 
 @Service
 @RequiredArgsConstructor

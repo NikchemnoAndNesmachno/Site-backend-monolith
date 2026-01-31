@@ -10,7 +10,7 @@ import ua.nin.identity.auth.model.Status;
 import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.EmailVerificationTokenRepository;
 import ua.nin.identity.auth.repository.UserRepository;
-import ua.nin.identity.auth.util.StringHelperUtils;
+import ua.nin.common.util.StringHelperUtils;
 import ua.nin.identity.auth.util.TimeTokenUtils;
 
 import java.time.Instant;

@@ -16,7 +16,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +37,12 @@ public class JwtConfig {
         byte[] secretBytes = secretBase64
                 ? Base64.getDecoder().decode(jwtSecret)
                 : jwtSecret.getBytes(StandardCharsets.UTF_8);
+
+        if (secretBytes.length < 32) {
+            throw new IllegalArgumentException(
+                    "JWT secret is too short for HS256 (min 32 bytes)"
+            );
+        }
 
         return new SecretKeySpec(secretBytes, "HmacSHA256");
     }

@@ -1,4 +1,4 @@
-package ua.nin.identity.auth.util;
+package ua.nin.common.util;
 
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +17,11 @@ public final class StringHelperUtils {
 
     public static String normalizeUsername(String username) {
         String trimmed = trimToNull(username);
+        return toRootLowerCase(trimmed);
+    }
+
+    public static String normalizeContentType(String contentType) {
+        String trimmed = trimToNull(contentType);
         return toRootLowerCase(trimmed);
     }
 

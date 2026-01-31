@@ -11,19 +11,20 @@ import ua.nin.identity.auth.exception.exceptions.BadCredentialsException;
 import ua.nin.identity.auth.exception.exceptions.ConflictException;
 import ua.nin.identity.auth.exception.exceptions.ForbiddenException;
 import ua.nin.identity.auth.exception.exceptions.NotFoundException;
+import ua.nin.identity.auth.mapper.MeResponseMapper;
 import ua.nin.identity.auth.model.Credential;
 import ua.nin.identity.auth.model.Role;
 import ua.nin.identity.auth.model.Status;
 import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.UserRepository;
-import ua.nin.identity.auth.util.StringHelperUtils;
+import ua.nin.common.util.StringHelperUtils;
 import ua.nin.identity.auth.util.SecurityUtils;
 import ua.nin.identity.profile.model.Privacy;
 import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
 
-import static ua.nin.identity.auth.util.StringHelperUtils.normalizeEmail;
+import static ua.nin.common.util.StringHelperUtils.normalizeEmail;
 
 import java.time.Instant;
 import java.util.List;
@@ -41,6 +42,8 @@ public class AuthService {
     private final AccessTokenService accessTokenService;
     private final RefreshTokenService refreshTokenService;
     private final EmailVerificationService emailVerificationService;
+
+    private final MeResponseMapper meResponseMapper;
 
     @Value("${jwt.access-ttl-minutes:10}")
     private long accessTtlMinutes;
@@ -176,11 +179,6 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        return new MeResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getStatus().name(),
-                user.getRole().name()
-        );
+        return meResponseMapper.toDto(user);
     }
 }

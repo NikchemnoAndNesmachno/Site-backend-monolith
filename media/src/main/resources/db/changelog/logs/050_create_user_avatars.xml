@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="050-create-user-avatars" author="Lain (Ivan)">
+        <createTable tableName="user_avatars" schemaName="media">
+            <!-- чий аватар -->
+            <!-- один користувач = один активний аватар -->
+            <column name="owner_user_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <!-- посилання на файл (media_assets) -->
+            <column name="media_asset_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- FK на користувача: якщо юзер видалений -> запис аватарки видалити -->
+        <addForeignKeyConstraint
+                baseTableSchemaName="media"
+                baseTableName="user_avatars"
+                baseColumnNames="owner_user_id"
+                referencedTableSchemaName="authentication"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_user_avatars_owner"
+                onDelete="CASCADE"/>
+
+        <!-- FK на asset: НЕ CASCADE (assets видаляє GC, а не каскади) -->
+        <addForeignKeyConstraint
+                baseTableSchemaName="media"
+                baseTableName="user_avatars"
+                baseColumnNames="media_asset_id"
+                referencedTableSchemaName="media"
+                referencedTableName="media_assets"
+                referencedColumnNames="id"
+                constraintName="fk_user_avatars_asset"
+                onDelete="RESTRICT"/>
+
+        <rollback>
+            <dropTable tableName="user_avatars" schemaName="media"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="051-create-user-avatars-indexes" author="Lain (Ivan)">
+        <createIndex tableName="user_avatars" schemaName="media" indexName="idx_user_avatars_asset">
+            <column name="media_asset_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="user_avatars" schemaName="media" indexName="idx_user_avatars_asset"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

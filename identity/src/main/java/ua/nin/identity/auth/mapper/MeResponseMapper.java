@@ -1,0 +1,12 @@
+package ua.nin.identity.auth.mapper;
+
+import org.mapstruct.Mapper;
+import ua.nin.identity.auth.dto.MeResponse;
+import ua.nin.identity.auth.model.User;
+
+@Mapper(componentModel = "spring")
+public interface MeResponseMapper {
+    MeResponse toDto(User user);
+
+    User toEntity(MeResponse meResponseDto);
+}

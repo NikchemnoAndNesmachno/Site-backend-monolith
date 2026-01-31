@@ -1,9 +1,10 @@
+server:
+  port: 8080
+
 spring:
   # Application
   application:
-    name: Identity
-  server:
-    port: 8080
+    name: NinSite
 
   # Datasource
   datasource:
@@ -14,7 +15,7 @@ spring:
 
   # Liquibase
   liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.xml
+    change-log: classpath:/db/changelog/db.changelog-master.xml
     enabled: true
     user: postgres
     password: postgres
@@ -29,6 +30,18 @@ spring:
           lob:
             non_contextual_creation: true
 
+  # Media config
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 120MB
+
+# Logging
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+# Identity token security
 jwt:
   secret: "dev-secret-change-measdasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
 
@@ -37,3 +50,11 @@ security:
     ttl-days: 14
     bytes: 64
     pepper: "CHANGE_ME_LONG_RANDOM"
+
+# Media config
+media:
+  storage:
+    local:
+      root: ./storage/media
+  limits:
+    max-size-bytes: 104857600

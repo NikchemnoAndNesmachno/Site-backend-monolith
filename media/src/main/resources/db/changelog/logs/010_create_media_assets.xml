@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="010-create-media-assets" author="Lain (Ivan)">
+        <createTable tableName="media_assets" schemaName="media">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="kind" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="content_type" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="original_filename" type="varchar(255)"/>
+
+            <column name="storage_key" type="varchar(512)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="size_bytes" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="sha256" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="deleted_at" type="timestamptz"/>
+        </createTable>
+
+        <addUniqueConstraint schemaName="media"
+                             tableName="media_assets"
+                             columnNames="sha256, size_bytes"
+                             constraintName="uq_media_assets_sha256_bytes"/>
+
+        <rollback>
+            <dropTable tableName="media_assets" schemaName="media"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="011-create-media-assets-indexes" author="Lain (Ivan)">
+        <createIndex tableName="media_assets" schemaName="media" indexName="idx_media_assets_sha256">
+            <column name="sha256"/>
+        </createIndex>
+
+        <createIndex tableName="media_assets" schemaName="media" indexName="idx_media_assets_created_at">
+            <column name="created_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="media_assets" schemaName="media" indexName="idx_media_assets_sha256"/>
+            <dropIndex tableName="media_assets" schemaName="media" indexName="idx_media_assets_created_at"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
