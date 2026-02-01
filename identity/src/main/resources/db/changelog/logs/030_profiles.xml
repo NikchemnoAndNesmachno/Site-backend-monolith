@@ -30,8 +30,6 @@
 
             <column name="display_name" type="varchar(64)"/>
 
-            <column name="avatar_media_id" type="BIGINT"/>
-
             <column name="bio" type="varchar(500)"/>
 
             <column name="privacy" type="varchar(32)" defaultValue="PUBLIC">
