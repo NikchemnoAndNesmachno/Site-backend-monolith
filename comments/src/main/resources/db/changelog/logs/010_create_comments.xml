@@ -53,7 +53,7 @@
                 referencedTableName="users"
                 referencedColumnNames="id"
                 constraintName="fk_comments_author_user"
-                onDelete="CASCADE"/>
+                onDelete="RESTRICT"/>
 
         <addForeignKeyConstraint
                 baseTableSchemaName="comments"
@@ -63,7 +63,7 @@
                 referencedTableName="comments"
                 referencedColumnNames="id"
                 constraintName="fk_comments_parent"
-                onDelete="CASCADE"/>
+                onDelete="RESTRICT"/>
 
         <rollback>
             <dropTable schemaName="comments" tableName="comments"/>
