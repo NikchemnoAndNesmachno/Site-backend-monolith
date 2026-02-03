@@ -9,7 +9,4 @@ import ua.nin.identity.auth.model.User;
 public interface MeResponseMapper {
     @Mapping(source = "id", target = "userId")
     MeResponse toDto(User user);
-
-    @Mapping(source = "userId", target = "id")
-    User toEntity(MeResponse meResponseDto);
 }

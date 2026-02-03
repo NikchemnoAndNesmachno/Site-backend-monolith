@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ua.nin.identity.auth.dto.*;
 import ua.nin.identity.auth.service.AuthService;
@@ -54,13 +55,15 @@ public class AuthController {
     }
 
     @PostMapping("/logout-all")
-    public ResponseEntity<Void> logoutAll() {
-        authService.logoutAll(); // userId береш із SecurityContext
+    public ResponseEntity<Void> logoutAll(Authentication authentication) {
+        long userId = Long.parseLong(authentication.getName());
+        authService.logoutAll(userId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
-    public ResponseEntity<MeResponse> me() {
-        return ResponseEntity.ok(authService.me());
+    public ResponseEntity<MeResponse> me(Authentication authentication) {
+        long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(authService.me(userId));
     }
 }

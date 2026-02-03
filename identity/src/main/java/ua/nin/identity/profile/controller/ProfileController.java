@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ua.nin.identity.auth.util.SecurityUtils;
 import ua.nin.identity.profile.dto.*;
 import ua.nin.identity.profile.service.ProfileService;
 
@@ -19,22 +18,14 @@ public class ProfileController {
     @GetMapping("/me")
     public ResponseEntity<ProfileResponse> me(Authentication authentication) {
         long userId = Long.parseLong(authentication.getName());
-        //long userId = SecurityUtils.currentUserId();
         return ResponseEntity.ok(profileService.getMyProfile(userId));
     }
 
     @PatchMapping("/me/profile")
-    public ResponseEntity<ProfileResponse> update(@Valid @RequestBody UpdateProfileRequest req) {
-        long userId = SecurityUtils.currentUserId();
+    public ResponseEntity<ProfileResponse> update(Authentication authentication, @Valid @RequestBody UpdateProfileRequest req) {
+        long userId = Long.parseLong(authentication.getName());
         return ResponseEntity.ok(profileService.updateMyProfile(userId, req));
     }
-
-//    @PostMapping("/me/avatar")
-//    public ResponseEntity<Void> setAvatar(@Valid @RequestBody SetAvatarRequest req) {
-//        long userId = SecurityUtils.currentUserId();
-//        profileService.setAvatar(userId, req.mediaId());
-//        return ResponseEntity.noContent().build();
-//    }
 
     @GetMapping("/by-username/{username}")
     public ResponseEntity<PublicProfileResponse> publicByUsername(@PathVariable String username) {
