@@ -6,12 +6,12 @@ import java.time.Instant;
 
 public record MediaMetaResponse(
         long id,
-        Long ownerUserId,
         MediaKind kind,
         String contentType,
         String originalFilename,
         long sizeBytes,
         String sha256,
-        Instant createdAt
+        Instant createdAt,
+        Instant deletedAt
 ) {
 }

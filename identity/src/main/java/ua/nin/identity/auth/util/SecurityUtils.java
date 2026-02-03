@@ -4,10 +4,19 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+// Left for later deletion
 @NoArgsConstructor
+@Deprecated(forRemoval = true)
+/**
+ * @deprecated
+ */
 public final class SecurityUtils {
 
-    // TODO: change to auth provider, so user id could be extracted from Authentication Principal in controller layer
+
+    @Deprecated
+    /**
+     * @deprecated (changed to Authentication (Principal) based JWT decoding in controllers
+     */
     public static long currentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || auth.getPrincipal() == null) {

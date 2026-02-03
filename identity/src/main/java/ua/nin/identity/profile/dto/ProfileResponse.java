@@ -8,7 +8,6 @@ public record ProfileResponse(
         long userId,
         String username,
         String displayName,
-        Long avatarMediaId,
         String bio,
         Privacy privacy,
         String locale,

@@ -7,6 +7,4 @@ import ua.nin.media.model.MediaAsset;
 @Mapper(componentModel = "spring")
 public interface MediaMetaResponseMapper {
     MediaMetaResponse toDto(MediaAsset mediaAsset);
-
-    MediaAsset toEntity(MediaMetaResponse mediaMetaResponseDto);
 }

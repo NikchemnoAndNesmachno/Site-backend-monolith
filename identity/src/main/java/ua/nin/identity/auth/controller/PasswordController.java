@@ -3,6 +3,7 @@ package ua.nin.identity.auth.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ua.nin.identity.auth.dto.ChangePasswordRequest;
 import ua.nin.identity.auth.dto.ForgotPasswordRequest;
@@ -30,8 +31,9 @@ public class PasswordController {
     }
 
     @PostMapping("/change")
-    public ResponseEntity<Void> change(@Valid @RequestBody ChangePasswordRequest req) {
-        passwordService.change(req.currentPassword(), req.newPassword());
+    public ResponseEntity<Void> change(Authentication authentication, @Valid @RequestBody ChangePasswordRequest req) {
+        long userId = Long.parseLong(authentication.getName());
+        passwordService.change(userId, req.currentPassword(), req.newPassword());
         return ResponseEntity.noContent().build();
     }
 }
