@@ -38,12 +38,12 @@ public class UserAvatarService {
 
     @Transactional
     public void deleteAvatar(long avatarId, long userId) {
-        UserAvatar avatar = userAvatarRepository.findById(avatarId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User avatar not found"));
-
-        if (!(avatar.getOwnerUserId() == userId)) {
+        if (avatarId != userId) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this avatar image");
         }
+
+        UserAvatar avatar = userAvatarRepository.findById(avatarId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User avatar not found"));
 
         userAvatarRepository.delete(avatar);
     }
