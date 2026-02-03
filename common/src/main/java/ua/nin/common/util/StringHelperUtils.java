@@ -25,18 +25,25 @@ public final class StringHelperUtils {
     }
 
     public static String normalizeAndTruncate(String s, int maxLength) {
-        String t = trimToNull(trimToNull(s));
+        String t = trimToNull(s);
         if (t == null) return null;
         return t.length() <= maxLength ? t : t.substring(0, maxLength);
     }
 
-    public static String normalizeTargetType(String s) {
-        String t = trimToNull(trimToNull(s));
+    public static String normalizeTargetType(String targetType) {
+        String t = trimToNull(targetType);
         return toRootUpperCase(t);
     }
 
-    public static String normalizeReactionCode(String s) {
-        String t = trimToNull(trimToNull(s));
+    public static String normalizeReactionCode(String reactionCode) {
+        String t = trimToNull(reactionCode);
         return toRootUpperCase(t);
+    }
+
+    public static String normalizeBody(String body) {
+        String t = trimToEmpty(body);
+        return t.length() > 500
+                ? t.substring(0, 500)
+                : t;
     }
 }
