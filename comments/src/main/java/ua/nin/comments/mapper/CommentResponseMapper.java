@@ -11,11 +11,13 @@ import ua.nin.comments.model.CommentStatus;
 public interface CommentResponseMapper {
     CommentResponse toDto(Comment comment);
 
-    @Mapping(target = "body", qualifiedByName = "mapPublicBody")
+    @Mapping(target = "body", source = ".", qualifiedByName = "mapPublicBody")
     CommentResponse toDtoPublic(Comment comment);
 
     @Named("mapPublicBody")
     default String mapPublicBody(Comment comment) {
-        return (comment.getStatus() == CommentStatus.ACTIVE) ? comment.getBody() : "[hidden]";
+        return (comment.getStatus() == CommentStatus.ACTIVE)
+                ? comment.getBody()
+                : "[hidden]";
     }
 }
