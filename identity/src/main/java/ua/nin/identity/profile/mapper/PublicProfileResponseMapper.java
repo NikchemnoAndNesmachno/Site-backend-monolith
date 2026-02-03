@@ -7,6 +7,4 @@ import ua.nin.identity.profile.model.Profile;
 @Mapper(componentModel = "spring")
 public interface PublicProfileResponseMapper {
     PublicProfileResponse toDto(Profile profile);
-
-    Profile toEntity(PublicProfileResponse publicProfileResponseDto);
 }

@@ -15,7 +15,6 @@ import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.PasswordResetTokenRepository;
 import ua.nin.identity.auth.repository.UserRepository;
 import ua.nin.common.util.StringHelperUtils;
-import ua.nin.identity.auth.util.SecurityUtils;
 import ua.nin.identity.auth.util.TimeTokenUtils;
 
 import java.time.Instant;
@@ -122,9 +121,7 @@ public class PasswordService {
      * Change password для залогіненого (access token required).
      */
     @Transactional
-    public void change(String currentPassword, String newPassword) {
-        long userId = SecurityUtils.currentUserId();
-
+    public void change(long userId, String currentPassword, String newPassword) {
         Credential cred = credentialRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("Credential missing"));
 

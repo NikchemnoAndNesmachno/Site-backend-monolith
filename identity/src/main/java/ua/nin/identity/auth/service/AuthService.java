@@ -19,7 +19,6 @@ import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.UserRepository;
 import ua.nin.common.util.StringHelperUtils;
-import ua.nin.identity.auth.util.SecurityUtils;
 import ua.nin.identity.profile.model.Privacy;
 import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
@@ -167,15 +166,13 @@ public class AuthService {
 
     // ---------------- LOGOUT ALL ----------------
     @Transactional
-    public void logoutAll() {
-        long userId = SecurityUtils.currentUserId();
+    public void logoutAll(long userId) {
         refreshTokenService.revokeAllForUser(userId);
     }
 
     // ---------------- ME ----------------
     @Transactional(readOnly = true)
-    public MeResponse me() {
-        long userId = SecurityUtils.currentUserId();
+    public MeResponse me(long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
