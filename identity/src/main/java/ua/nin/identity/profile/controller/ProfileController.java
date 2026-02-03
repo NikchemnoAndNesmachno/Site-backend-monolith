@@ -29,12 +29,12 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.updateMyProfile(userId, req));
     }
 
-    @PostMapping("/me/avatar")
-    public ResponseEntity<Void> setAvatar(@Valid @RequestBody SetAvatarRequest req) {
-        long userId = SecurityUtils.currentUserId();
-        profileService.setAvatar(userId, req.mediaId());
-        return ResponseEntity.noContent().build();
-    }
+//    @PostMapping("/me/avatar")
+//    public ResponseEntity<Void> setAvatar(@Valid @RequestBody SetAvatarRequest req) {
+//        long userId = SecurityUtils.currentUserId();
+//        profileService.setAvatar(userId, req.mediaId());
+//        return ResponseEntity.noContent().build();
+//    }
 
     @GetMapping("/by-username/{username}")
     public ResponseEntity<PublicProfileResponse> publicByUsername(@PathVariable String username) {

@@ -31,9 +31,6 @@ public class Profile {
     @Column(name = "display_name")
     private String displayName;
 
-    @Column(name = "avatar_media_id")
-    private Long avatarMediaId;
-
     @Column(name = "bio")
     private String bio;
 

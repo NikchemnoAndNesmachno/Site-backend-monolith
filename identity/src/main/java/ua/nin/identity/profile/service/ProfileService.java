@@ -53,12 +53,12 @@ public class ProfileService {
         return profileResponseMapper.toDto(p);
     }
 
-    @Transactional
-    public void setAvatar(long userId, long mediaId) {
-        Profile p = profileRepository.findById(userId)
-                .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
-        p.setAvatarMediaId(mediaId);
-    }
+//    @Transactional
+//    public void setAvatar(long userId, long mediaId) {
+//        Profile p = profileRepository.findById(userId)
+//                .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
+//        p.setAvatarMediaId(mediaId);
+//    }
 
     @Transactional(readOnly = true)
     public PublicProfileResponse getPublicByUsername(String username) {
