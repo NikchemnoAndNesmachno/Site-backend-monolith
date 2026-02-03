@@ -4,10 +4,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
+import ua.nin.views.model.ViewUnique;
 
 import java.time.Instant;
 
-public interface ViewUniqueRepository extends Repository<Object, Long> {
+import static ua.nin.views.model.ViewUnique.ViewUniqueId;
+
+public interface ViewUniqueRepository extends Repository<ViewUnique, ViewUniqueId> {
 
     @Modifying
     @Query(value = """

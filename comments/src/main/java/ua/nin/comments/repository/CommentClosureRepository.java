@@ -6,7 +6,9 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 import ua.nin.comments.model.CommentClosure;
 
-public interface CommentClosureRepository extends Repository<CommentClosure, CommentClosure.CommentClosureId> {
+import static ua.nin.comments.model.CommentClosure.CommentClosureId;
+
+public interface CommentClosureRepository extends Repository<CommentClosure, CommentClosureId> {
 
     @Modifying
     @Query(value = """
