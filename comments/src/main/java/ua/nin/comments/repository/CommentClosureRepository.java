@@ -4,8 +4,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
+import ua.nin.comments.model.CommentClosure;
 
-public interface CommentClosureRepository extends Repository<Object, Long> {
+public interface CommentClosureRepository extends Repository<CommentClosure, CommentClosure.CommentClosureId> {
 
     @Modifying
     @Query(value = """
