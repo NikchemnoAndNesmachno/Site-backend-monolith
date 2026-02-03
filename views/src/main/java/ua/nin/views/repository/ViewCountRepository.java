@@ -6,7 +6,9 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 import ua.nin.views.model.ViewCount;
 
-public interface ViewCountRepository extends Repository<Object, Long> {
+import static ua.nin.views.model.ViewCount.ViewCountId;
+
+public interface ViewCountRepository extends Repository<ViewCount, ViewCountId> {
 
     @Modifying
     @Query(value = """
