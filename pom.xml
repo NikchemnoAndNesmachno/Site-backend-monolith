@@ -51,13 +51,14 @@
         <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
         <jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
 
+        <sonar.maven.plugin.version>5.5.0.6356</sonar.maven.plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.java.binaries>target/classes</sonar.java.binaries>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.organization>nikchemnoandnesmachno</sonar.organization>
         <sonar.projectKey>NikchemnoAndNesmachno_Site-backend-monolith</sonar.projectKey>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>**/target/surefire-reports/*.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.language>java</sonar.language>
     </properties>
 
@@ -110,6 +111,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar.maven.plugin.version}</version>
             </plugin>
 
             <plugin>
