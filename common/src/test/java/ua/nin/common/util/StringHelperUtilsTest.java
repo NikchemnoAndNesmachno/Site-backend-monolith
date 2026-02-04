@@ -21,6 +21,7 @@ class StringHelperUtilsTest {
     @Test
     void normalizeContentType_lowercases() {
         assertEquals("image/png", StringHelperUtils.normalizeContentType(" IMAGE/PNG "));
+        assertNull(StringHelperUtils.normalizeContentType(null));
     }
 
     @Test
@@ -39,6 +40,7 @@ class StringHelperUtilsTest {
     @Test
     void normalizeReactionCode_uppercases() {
         assertEquals("LIKE", StringHelperUtils.normalizeReactionCode(" like "));
+        assertNull(StringHelperUtils.normalizeReactionCode(null));
     }
 
     @Test
@@ -47,5 +49,13 @@ class StringHelperUtilsTest {
         String normalized = StringHelperUtils.normalizeBody(body);
 
         assertEquals(500, normalized.length());
+    }
+
+    @Test
+    void normalizeBody_truncatesToEmpty() {
+        String body = "";
+        String normalizedNull = StringHelperUtils.normalizeBody(body);
+
+        assertEquals("", normalizedNull);
     }
 }
