@@ -75,7 +75,7 @@ jobs:
       run: |
         echo "--- Starting Unified Build and Sonar Analysis ---"
         
-        SONAR_CMD="mvn -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        SONAR_CMD="mvn -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar"
         
         if [ "${{ github.event_name }}" = "pull_request" ]; then
                     echo "--- Adding Pull Request parameters for Sonar Analysis ---"
