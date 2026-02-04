@@ -5,7 +5,7 @@ WORKDIR /app
 RUN useradd -r -u 10001 appuser
 USER appuser
 
-COPY --from=build /workspace/app/target/*.jar /app/app.jar
+COPY **/target/app.jar /app/app.jar
 
 EXPOSE 8080
 
