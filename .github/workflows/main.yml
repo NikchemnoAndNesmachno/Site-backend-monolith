@@ -66,8 +66,10 @@ jobs:
       if: success() || failure()
       with:
         name: Tests Report
-        path: ${{ env.springBootModuleName }}/target/surefire-reports/*.xml
+        path: |
+          **/target/surefire-reports/*.xml
         reporter: java-junit
+        fail-on-empty: false
 
     - name: Rename user jar to app
       run: mv $springBootModuleName/target/*.jar $springBootModuleName/target/$springBootJarName
