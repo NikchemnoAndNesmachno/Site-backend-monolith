@@ -28,27 +28,28 @@ public class MediaController {
         return ResponseEntity.ok(mediaService.uploadAsset(file));
     }
 
-    @GetMapping("/{id}/meta")
-    public ResponseEntity<MediaMetaResponse> meta(@PathVariable long id) {
-        return ResponseEntity.ok(mediaService.metaInformation(id));
+    @GetMapping("/{mediaId}/meta")
+    public ResponseEntity<MediaMetaResponse> meta(@PathVariable long mediaId) {
+        return ResponseEntity.ok(mediaService.metaInformation(mediaId));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<InputStreamResource> download(@PathVariable long id) {
-        MediaAsset asset = mediaService.getAssetOrThrow(id);
+    @GetMapping("/{mediaId}")
+    public ResponseEntity<InputStreamResource> download(@PathVariable long mediaId) {
+        MediaAsset asset = mediaService.getAssetOrThrow(mediaId);
 
-        InputStreamResource body = new InputStreamResource(mediaService.open(id));
+        InputStreamResource body = new InputStreamResource(mediaService.open(mediaId));
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + safeFilename(asset.getOriginalFilename(), id) + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + safeFilename(asset.getOriginalFilename(), mediaId) + "\"")
                 .contentType(MediaType.parseMediaType(asset.getContentType()))
                 .contentLength(asset.getSizeBytes())
                 .body(body);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id, Authentication authentication) {
-        mediaService.deleteAsset(id);
+    @DeleteMapping("/{mediaId}")
+    public ResponseEntity<Void> delete(Authentication authentication,
+                                       @PathVariable long mediaId) {
+        mediaService.deleteAsset(mediaId);
         return ResponseEntity.noContent().build();
     }
 
