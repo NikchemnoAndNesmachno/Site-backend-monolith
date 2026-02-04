@@ -85,6 +85,13 @@ jobs:
         reporter: java-junit
         fail-on-empty: false
 
+    - name: Debug JaCoCo files
+      run: |
+        ls -la
+        ls -la app/target/site || true
+        ls -la app/target/site/jacoco-aggregate || true
+        find . -name jacoco.xml -o -name jacoco.exec
+
     - name: Rename user jar to app
       run: mv $springBootModuleName/target/*.jar $springBootModuleName/target/$springBootJarName
 
