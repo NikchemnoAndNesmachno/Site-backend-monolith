@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="030-create-reaction-counts" author="Lain (Ivan)">
+        <createTable tableName="reaction_counts" schemaName="reactions">
+            <column name="target_type" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="target_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="reaction_code" type="varchar(32)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="cnt" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false" checkConstraint="cnt >= 0"/>
+            </column>
+
+            <column name="updated_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey
+                schemaName="reactions"
+                tableName="reaction_counts"
+                columnNames="target_type,target_id,reaction_code"
+                constraintName="pk_reaction_counts"/>
+
+        <!-- корисно для запросів типу: "дай лайки для target списку" -->
+        <createIndex schemaName="reactions" tableName="reaction_counts"
+                     indexName="idx_reaction_counts_code_target">
+            <column name="reaction_code"/>
+            <column name="target_type"/>
+            <column name="target_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex schemaName="reactions" tableName="reaction_counts"
+                       indexName="idx_reaction_counts_code_target"/>
+            <dropTable schemaName="reactions" tableName="reaction_counts"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

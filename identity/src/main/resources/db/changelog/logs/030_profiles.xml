@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="030-create-profile-schema" author="Lain (Ivan)">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS profile;
+        </sql>
+
+        <rollback>
+            <sql>
+                DROP SCHEMA profile;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="030-create-profiles" author="Lain (Ivan)">
+        <createTable tableName="profiles" schemaName="profile">
+            <column name="user_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="username" type="varchar(64)">
+                <constraints nullable="false"
+                             unique="true"/>
+            </column>
+
+            <column name="display_name" type="varchar(64)"/>
+
+            <column name="bio" type="varchar(500)"/>
+
+            <column name="privacy" type="varchar(32)" defaultValue="PUBLIC">
+                <constraints nullable="false"
+                             checkConstraint="privacy IN ('PUBLIC', 'FRIENDS_ONLY', 'PRIVATE')"/>
+            </column>
+
+            <column name="locale" type="varchar(16)"/>
+
+            <column name="timezone" type="varchar(64)"/>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="updated_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableSchemaName="profile"
+                baseTableName="profiles"
+                baseColumnNames="user_id"
+                referencedTableSchemaName="authentication"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_profiles_user"
+                onDelete="CASCADE"/>
+
+        <rollback>
+            <dropTable tableName="profiles" schemaName="profile"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="031" author="Lain (Ivan)">
+        <createIndex tableName="profiles" indexName="idx_profiles_username" schemaName="profile">
+            <column name="username"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="profiles" indexName="idx_profiles_username" schemaName="profile"/>
+        </rollback>
+    </changeSet>
+
+
+</databaseChangeLog>

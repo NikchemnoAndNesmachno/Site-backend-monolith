@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.25.xsd">
+
+    <changeSet id="040-create-refresh-token-families" author="Lain (Ivan)">
+        <createTable tableName="refresh_token_families" schemaName="authentication">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_at" type="timestamptz" defaultValueComputed="now()">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_used_at" type="timestamptz"/>
+
+            <column name="revoked_at" type="timestamptz"/>
+
+            <column name="user_agent" type="varchar(512)"/>
+
+            <!-- Працює у Postgres. Альтернативно - varchar(64)-->
+            <column name="ip" type="inet"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableSchemaName="authentication"
+                baseTableName="refresh_token_families"
+                baseColumnNames="user_id"
+                referencedTableSchemaName="authentication"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_refresh_token_families_user"
+                onDelete="CASCADE"/>
+
+        <addUniqueConstraint
+                schemaName="authentication"
+                tableName="refresh_token_families"
+                columnNames="id,user_id"
+                constraintName="uq_refresh_token_families_id_user"/>
+
+        <rollback>
+            <dropTable tableName="refresh_token_families" schemaName="authentication"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="041" author="Lain (Ivan)">
+        <createIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_user_id" schemaName="authentication">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_revoked_at" schemaName="authentication">
+            <column name="revoked_at"/>
+        </createIndex>
+
+        <createIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_id_user_id" schemaName="authentication">
+            <column name="id"/>
+            <column name="user_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_user_id" schemaName="authentication"/>
+            <dropIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_revoked_at" schemaName="authentication"/>
+            <dropIndex tableName="refresh_token_families" indexName="idx_refresh_token_families_id_user_id" schemaName="authentication"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
