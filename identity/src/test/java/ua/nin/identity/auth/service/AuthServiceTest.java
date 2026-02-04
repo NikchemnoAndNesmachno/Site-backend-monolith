@@ -8,10 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ua.nin.identity.auth.dto.*;
-import ua.nin.identity.auth.exception.exceptions.BadCredentialsException;
-import ua.nin.identity.auth.exception.exceptions.ConflictException;
-import ua.nin.identity.auth.exception.exceptions.ForbiddenException;
-import ua.nin.identity.auth.exception.exceptions.NotFoundException;
+import ua.nin.identity.auth.exception.exceptions.*;
 import ua.nin.identity.auth.mapper.MeResponseMapper;
 import ua.nin.identity.auth.model.Credential;
 import ua.nin.identity.auth.model.Role;
@@ -262,7 +259,7 @@ class AuthServiceTest {
         when(userRepository.findById(19L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.me(userId))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User not found");
     }
 

@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import ua.nin.media.dto.MediaMetaResponse;
+import ua.nin.media.exception.exceptions.MediaNotFoundException;
 import ua.nin.media.mapper.MediaMetaResponseMapper;
 import ua.nin.media.model.MediaAsset;
 import ua.nin.media.model.MediaKind;
@@ -50,7 +51,7 @@ class MediaServiceTest {
         when(assetRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> mediaService.metaInformation(1L))
-                .isInstanceOf(ResponseStatusException.class)
+                .isInstanceOf(MediaNotFoundException.class)
                 .hasMessageContaining("Media not found");
     }
 

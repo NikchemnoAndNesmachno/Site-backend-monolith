@@ -43,7 +43,7 @@ class MediaControllerTest {
 
     @Test
     void upload_returnsResponse() throws Exception {
-        when(mediaService.uploadAsset(any(Long.class), any())).thenReturn(new MediaUploadResponse(1L));
+        when(mediaService.uploadAsset(any())).thenReturn(new MediaUploadResponse(1L));
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("1");

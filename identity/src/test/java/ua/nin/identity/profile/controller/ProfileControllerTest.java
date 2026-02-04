@@ -68,7 +68,7 @@ class ProfileControllerTest {
         Authentication authentication = mock(Authentication.class);
         when(authentication.getName()).thenReturn("1");
 
-        mockMvc.perform(patch("/api/v1/users/me/profile")
+        mockMvc.perform(patch("/api/v1/users/me")
                         .principal(authentication)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
