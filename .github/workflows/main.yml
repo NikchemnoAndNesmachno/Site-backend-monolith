@@ -73,7 +73,7 @@ jobs:
         PR_BRANCH: ${{ github.head_ref }}
         PR_BASE: ${{ github.base_ref }}
 
-      run: mvn -B install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      run: mvn -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
     - name: Test Reporter
       uses: dorny/test-reporter@v1
