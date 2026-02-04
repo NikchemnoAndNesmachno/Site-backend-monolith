@@ -15,7 +15,6 @@ public class ViewController {
 
     private final ViewService viewService;
 
-    // public endpoint: record view
     @PostMapping
     public ResponseEntity<Void> recordView(
             @RequestParam @NotBlank String targetType,
@@ -35,7 +34,6 @@ public class ViewController {
         return ResponseEntity.noContent().build();
     }
 
-    // public endpoint: get counts
     @GetMapping
     public ResponseEntity<ViewCountsResponse> viewCountsForTarget(
             @RequestParam @NotBlank String targetType,

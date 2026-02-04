@@ -18,15 +18,18 @@ public class UserAvatarController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AvatarUploadResponse> uploadVideoWithPreview(
-            @RequestPart("avatar") MultipartFile avatar,
-            Authentication authentication
+            Authentication authentication,
+            @RequestPart("avatar") MultipartFile avatar
     ) {
         long userId = Long.parseLong(authentication.getName());
         return ResponseEntity.ok(userAvatarService.uploadAvatar(userId, avatar));
     }
 
     @DeleteMapping("/{avatarId}")
-    public ResponseEntity<Void> delete(@PathVariable long avatarId, Authentication authentication) {
+    public ResponseEntity<Void> delete(
+            Authentication authentication,
+            @PathVariable long avatarId
+    ) {
         long userId = Long.parseLong(authentication.getName());
         userAvatarService.deleteAvatar(userId, avatarId);
         return ResponseEntity.noContent().build();
