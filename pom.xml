@@ -60,7 +60,7 @@
         <sonar.projectKey>NikchemnoAndNesmachno_Site-backend-monolith</sonar.projectKey>
 <!--    app збирає jacoco-aggregate, маючи контекст усіх модулів (тому що він залежить від них)-->
         <sonar.coverage.jacoco.xmlReportPaths>
-            app/target/site/jacoco-aggregate/jacoco.xml
+            **/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
         <sonar.language>java</sonar.language>
     </properties>
