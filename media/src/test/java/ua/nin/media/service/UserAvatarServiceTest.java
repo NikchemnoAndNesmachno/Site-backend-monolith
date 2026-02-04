@@ -6,8 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import ua.nin.media.dto.AvatarUploadResponse;
+import ua.nin.media.exception.exceptions.AvatarForbiddenDeletionException;
 import ua.nin.media.model.MediaAsset;
 import ua.nin.media.model.UserAvatar;
 import ua.nin.media.repository.UserAvatarRepository;
@@ -44,7 +44,7 @@ class UserAvatarServiceTest {
     @Test
     void deleteAvatar_notOwner_throws() {
         assertThatThrownBy(() -> userAvatarService.deleteAvatar(1L, 2L))
-                .isInstanceOf(ResponseStatusException.class)
+                .isInstanceOf(AvatarForbiddenDeletionException.class)
                 .hasMessageContaining("not allowed");
 
         verifyNoInteractions(userAvatarRepository);

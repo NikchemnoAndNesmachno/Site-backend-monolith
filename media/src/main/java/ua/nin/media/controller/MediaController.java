@@ -22,11 +22,10 @@ public class MediaController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MediaUploadResponse> upload(
-            @RequestPart("file") MultipartFile file,
-            Authentication authentication
+            Authentication authentication,
+            @RequestPart("file") MultipartFile file
     ) {
-        long userId = Long.parseLong(authentication.getName());
-        return ResponseEntity.ok(mediaService.uploadAsset(userId, file));
+        return ResponseEntity.ok(mediaService.uploadAsset(file));
     }
 
     @GetMapping("/{id}/meta")

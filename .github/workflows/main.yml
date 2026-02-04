@@ -15,10 +15,10 @@ on:
     branches: [ "main" ]
 
 env:
-  repository: user
-  userRepoName: app
-  onbootJarName: app.jar
-  dockerRepoName: ---
+#  repository: user
+  springBootModuleName: app
+  springBootJarName: app.jar
+  dockerRepoName: bucketblueberry/nin-backend
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -50,18 +50,27 @@ jobs:
         cache: maven
         
     - name: Build with Maven
-      run: mvn clean install
+
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_USER }}
+        PR_KEY: ${{ github.event.pull_request.number }}
+        PR_BRANCH: ${{ github.head_ref }}
+        PR_BASE: ${{ github.base_ref }}
+
+      run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install
 
     - name: Test Reporter
       uses: dorny/test-reporter@v1
       if: success() || failure()
       with:
         name: Tests Report
-        path: ${{ env.userRepoName }}/target/surefire-reports/*.xml
+        path: ${{ env.springBootModuleName }}/target/surefire-reports/*.xml
         reporter: java-junit
 
     - name: Rename user jar to app
-      run: mv $userRepoName/target/*.jar $userRepoName/target/$onbootJarName
+      run: mv $springBootModuleName/target/*.jar $springBootModuleName/target/$springBootJarName
 
     - name: Set outputs
       id: set-outputs

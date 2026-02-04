@@ -6,8 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import ua.nin.media.dto.VideoWithPreviewUploadResponse;
+import ua.nin.media.exception.exceptions.VideoForbiddenDeletionException;
 import ua.nin.media.model.*;
 import ua.nin.media.repository.VideoRepository;
 
@@ -59,7 +59,7 @@ class VideoServiceTest {
         when(videoRepository.findById(1L)).thenReturn(Optional.of(video));
 
         assertThatThrownBy(() -> videoService.deleteVideoWithPreview(1L, 1L))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("not allowed");
+                .isInstanceOf(VideoForbiddenDeletionException.class)
+                .hasMessageContaining("You are not allowed to delete this video");
     }
 }
