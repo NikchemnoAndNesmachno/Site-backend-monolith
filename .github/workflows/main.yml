@@ -82,6 +82,8 @@ jobs:
     - name: Update dependency graph
       uses: advanced-security/maven-dependency-submission-action@v5
       with:
+        ignore-maven-wrapper: true
+        directory: .
         maven-args: -DskipTests
 
   docker-build:
