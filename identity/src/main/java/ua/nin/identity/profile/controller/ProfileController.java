@@ -21,7 +21,7 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.getMyProfile(userId));
     }
 
-    @PatchMapping("/me/profile")
+    @PatchMapping("/me")
     public ResponseEntity<ProfileResponse> update(Authentication authentication, @Valid @RequestBody UpdateProfileRequest req) {
         long userId = Long.parseLong(authentication.getName());
         return ResponseEntity.ok(profileService.updateMyProfile(userId, req));

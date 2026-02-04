@@ -1,14 +1,17 @@
 package ua.nin.media.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import ua.nin.media.dto.VideoWithPreviewUploadResponse;
+import ua.nin.media.exception.exceptions.VideoForbiddenDeletionException;
+import ua.nin.media.exception.exceptions.VideoNotFound;
 import ua.nin.media.model.*;
 import ua.nin.media.repository.VideoRepository;
+
+import static ua.nin.common.constant.ErrorMessage.USER_NOT_ALLOWED_TO_DELETE_VIDEO;
+import static ua.nin.common.constant.ErrorMessage.VIDEO_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -51,10 +54,10 @@ public class VideoService {
     @Transactional
     public void deleteVideoWithPreview(long userId, long videoId) {
         Video video = videoRepository.findById(videoId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Video not found"));
+                .orElseThrow(() -> new VideoNotFound(VIDEO_NOT_FOUND));
 
-        if (!(video.getOwnerUserId() == userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this video");
+        if (video.getOwnerUserId() != userId) {
+            throw new VideoForbiddenDeletionException(USER_NOT_ALLOWED_TO_DELETE_VIDEO);
         }
 
         videoRepository.delete(video);

@@ -8,6 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import ua.nin.media.dto.MediaMetaResponse;
 import ua.nin.media.dto.MediaUploadResponse;
+import ua.nin.media.exception.exceptions.FileMovingException;
+import ua.nin.media.exception.exceptions.FileStoringException;
+import ua.nin.media.exception.exceptions.MediaNotFoundException;
 import ua.nin.media.mapper.MediaMetaResponseMapper;
 import ua.nin.media.model.*;
 import ua.nin.media.repository.MediaAssetRepository;
@@ -23,6 +26,8 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.HexFormat;
 
+import static ua.nin.common.constant.AppConstant.SHA_256;
+import static ua.nin.common.constant.ErrorMessage.*;
 import static ua.nin.common.util.StringHelperUtils.normalizeContentType;
 import static ua.nin.media.util.MediaUtils.*;
 
@@ -38,7 +43,7 @@ public class MediaService {
     private final MultipartMediaValidator multipartMediaValidator;
 
     @Transactional
-    public MediaUploadResponse uploadAsset(long ownerUserId, MultipartFile file) {
+    public MediaUploadResponse uploadAsset(MultipartFile file) {
         MediaAsset asset = storeSingle(file, null);
         return new MediaUploadResponse(asset.getId());
     }
@@ -64,14 +69,14 @@ public class MediaService {
     @Transactional(readOnly = true)
     public MediaMetaResponse metaInformation(long id) {
         MediaAsset asset = assetRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
+                .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND));
         return mediaMetaResponseMapper.toDto(asset);
     }
 
     @Transactional
     public void deleteAsset(long id) {
         MediaAsset asset = assetRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
+                .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND));
 
         asset.setDeletedAt(Instant.now());
         assetRepository.save(asset);
@@ -86,18 +91,18 @@ public class MediaService {
     @Transactional(readOnly = true)
     public InputStream open(long id) {
         MediaAsset asset = assetRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
+                .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND));
         try {
             return storage.open(asset.getStorageKey());
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found on storage");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILE_NOT_FOUND);
         }
     }
 
     @Transactional(readOnly = true)
     public MediaAsset getAssetOrThrow(long id) {
         return assetRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Media not found"));
+                .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND));
     }
 
     @Transactional
@@ -116,14 +121,14 @@ public class MediaService {
         long sizeBytes = file.getSize();
 
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            MessageDigest md = MessageDigest.getInstance(SHA_256);
             try (InputStream raw = file.getInputStream();
                  InputStream in = new DigestInputStream(raw, md)) {
                 storage.save(tmpStorageKey, in);
             }
             sha256 = HexFormat.of().formatHex(md.digest());
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot store media");
+            throw new FileStoringException(CANNOT_STORE_MEDIA);
         }
 
         var existing = assetRepository.findBySha256AndSizeBytesAndDeletedAtIsNull(sha256, sizeBytes);
@@ -139,7 +144,7 @@ public class MediaService {
         try {
             storage.move(tmpStorageKey, storageKey);
         } catch (IOException ignored) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot finalize media");
+            throw new FileMovingException(CANNOT_FINALIZE_MEDIA);
         }
 
         MediaAsset asset = MediaAsset.builder()

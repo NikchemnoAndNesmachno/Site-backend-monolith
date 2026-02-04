@@ -7,10 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.nin.identity.auth.dto.*;
-import ua.nin.identity.auth.exception.exceptions.BadCredentialsException;
-import ua.nin.identity.auth.exception.exceptions.ConflictException;
-import ua.nin.identity.auth.exception.exceptions.ForbiddenException;
-import ua.nin.identity.auth.exception.exceptions.NotFoundException;
+import ua.nin.identity.auth.exception.exceptions.*;
 import ua.nin.identity.auth.mapper.MeResponseMapper;
 import ua.nin.identity.auth.model.Credential;
 import ua.nin.identity.auth.model.Role;
@@ -23,6 +20,7 @@ import ua.nin.identity.profile.model.Privacy;
 import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
 
+import static ua.nin.common.constant.ErrorMessage.*;
 import static ua.nin.common.util.StringHelperUtils.normalizeEmail;
 
 import java.time.Instant;
@@ -54,10 +52,10 @@ public class AuthService {
         String username = req.username().trim();
 
         if (userRepository.existsByEmail(email)) {
-            throw new ConflictException("Email already exists");
+            throw new ConflictException(EMAIL_ALREADY_EXISTS);
         }
         if (profileRepository.existsByUsername(username)) {
-            throw new ConflictException("Username already exists");
+            throw new ConflictException(USERNAME_ALREADY_EXISTS);
         }
 
         User user = User.builder()
@@ -94,18 +92,18 @@ public class AuthService {
         String email = normalizeEmail(req.email());
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+                .orElseThrow(() -> new BadCredentialsException(INVALID_CREDENTIALS));
 
         if (user.getStatus() == Status.BANNED || user.getStatus() == Status.DELETED) {
-            throw new ForbiddenException("User is not allowed to login");
+            throw new ForbiddenException(FORBIDDEN_LOGIN);
         }
 
         Credential cred = credentialRepository.findById(user.getId())
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+                .orElseThrow(() -> new BadCredentialsException(INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(req.password(), cred.getPasswordHash())) {
             cred.incrementFailedLoginAttempts();
-            throw new BadCredentialsException("Invalid credentials");
+            throw new BadCredentialsException(INVALID_CREDENTIALS);
         }
 
         // optional: last_login_at
@@ -174,7 +172,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public MeResponse me(long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
 
         return meResponseMapper.toDto(user);
     }

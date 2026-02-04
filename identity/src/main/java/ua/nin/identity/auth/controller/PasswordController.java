@@ -31,7 +31,8 @@ public class PasswordController {
     }
 
     @PostMapping("/change")
-    public ResponseEntity<Void> change(Authentication authentication, @Valid @RequestBody ChangePasswordRequest req) {
+    public ResponseEntity<Void> change(Authentication authentication,
+                                       @Valid @RequestBody ChangePasswordRequest req) {
         long userId = Long.parseLong(authentication.getName());
         passwordService.change(userId, req.currentPassword(), req.newPassword());
         return ResponseEntity.noContent().build();
