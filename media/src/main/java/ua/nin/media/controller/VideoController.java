@@ -31,10 +31,10 @@ public class VideoController {
         return ResponseEntity.ok(videoService.uploadVideoWithPreview(title, description, visibility, userId, video, preview));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable long id, Authentication authentication) {
+    @DeleteMapping("/{videoId}")
+    public ResponseEntity<Void> delete(@PathVariable long videoId, Authentication authentication) {
         long userId = Long.parseLong(authentication.getName());
-        videoService.deleteVideoWithPreview(userId, id);
+        videoService.deleteVideoWithPreview(userId, videoId);
         return ResponseEntity.noContent().build();
     }
 }
