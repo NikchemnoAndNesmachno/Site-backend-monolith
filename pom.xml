@@ -56,9 +56,10 @@
         <sonar.java.binaries>target/classes</sonar.java.binaries>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.exclusions>contract-api/**</sonar.exclusions>
         <sonar.organization>nikchemnoandnesmachno</sonar.organization>
         <sonar.projectKey>NikchemnoAndNesmachno_Site-backend-monolith</sonar.projectKey>
-        <sonar.coverage.jacoco.xmlReportPaths>jacoco-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.language>java</sonar.language>
     </properties>
 
