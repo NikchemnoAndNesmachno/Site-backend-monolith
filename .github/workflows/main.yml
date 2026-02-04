@@ -13,6 +13,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 env:
 #  repository: user
@@ -21,7 +22,6 @@ env:
   dockerRepoName: bucketblueberry/nin-backend
 
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
 
 jobs:
 
@@ -47,7 +47,6 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-        cache: maven
 
     - name: Cache SonarQube packages
       uses: actions/cache@v5
@@ -63,7 +62,7 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
 
-    - name: Build with Maven
+    - name: Build with Maven and Sonar Analysis
 
       if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' }}
       env:
@@ -73,7 +72,21 @@ jobs:
         PR_BRANCH: ${{ github.head_ref }}
         PR_BASE: ${{ github.base_ref }}
 
-      run: mvn -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+      run: |
+        echo "--- Starting Unified Build and Sonar Analysis ---"
+        
+        SONAR_CMD="mvn -B clean install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+                    echo "--- Adding Pull Request parameters for Sonar Analysis ---"
+                    SONAR_CMD="$SONAR_CMD -Dsonar.pullrequest.key=$PR_KEY -Dsonar.pullrequest.branch=$PR_BRANCH -Dsonar.pullrequest.base=$PR_BASE"
+                  else
+                    BRANCH_NAME=$(echo ${{ github.ref }} | sed 's/refs\/heads\///')
+                    echo "--- Running standard Branch Analysis for Sonar on branch $BRANCH_NAME ---"
+                    SONAR_CMD="$SONAR_CMD -Dsonar.branch.name=$BRANCH_NAME"
+                  fi
+        
+                  eval "$SONAR_CMD"
 
     - name: Test Reporter
       uses: dorny/test-reporter@v1
@@ -85,15 +98,15 @@ jobs:
         reporter: java-junit
         fail-on-empty: false
 
-    - name: Debug JaCoCo files
-      run: |
-        ls -la
-        ls -la app/target/site || true
-        ls -la app/target/site/jacoco-aggregate || true
-        find . -name jacoco.xml -o -name jacoco.exec
-
     - name: Rename user jar to app
       run: mv $springBootModuleName/target/*.jar $springBootModuleName/target/$springBootJarName
+
+    - name: Upload app jar artifact
+      uses: actions/upload-artifact@v5
+      with:
+        name: app-jar
+        path: ${{ env.springBootModuleName }}/target/${{ env.springBootJarName }}
+        if-no-files-found: error
 
     - name: Set outputs
       id: set-outputs
@@ -117,6 +130,12 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v5
+
+      - name: Download app jar artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: app-jar
+          path: ${{ env.springBootModuleName }}/target
 
       - name: Docker Login
         uses: docker/login-action@v3
