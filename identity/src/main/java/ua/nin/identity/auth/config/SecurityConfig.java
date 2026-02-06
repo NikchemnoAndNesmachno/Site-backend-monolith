@@ -44,7 +44,7 @@ public class SecurityConfig {
                 p.matcher(HttpMethod.POST, API_V1_AUTH_LOGOUT),
                 p.matcher(HttpMethod.POST, API_V1_AUTH_REFRESH),
 
-                p.matcher(HttpMethod.POST, API_V1_AUTH_EMAIL_VERIFY),
+                p.matcher(HttpMethod.GET, API_V1_AUTH_EMAIL_VERIFY),
                 p.matcher(HttpMethod.POST, API_V1_AUTH_EMAIL_RESEND),
 
                 p.matcher(HttpMethod.POST, API_V1_AUTH_PASSWORD_FORGOT),

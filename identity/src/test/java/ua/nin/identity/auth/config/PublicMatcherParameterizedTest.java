@@ -38,7 +38,7 @@ class PublicMatcherParameterizedTest {
                 c(HttpMethod.POST, API_V1_AUTH_LOGOUT, "/api/v1/auth/logout"),
                 c(HttpMethod.POST, API_V1_AUTH_REFRESH, "/api/v1/auth/refresh"),
 
-                c(HttpMethod.POST, API_V1_AUTH_EMAIL_VERIFY, "/api/v1/auth/email/verify"),
+                c(HttpMethod.GET, API_V1_AUTH_EMAIL_VERIFY, "/api/v1/auth/email/verify"),
                 c(HttpMethod.POST, API_V1_AUTH_EMAIL_RESEND, "/api/v1/auth/email/resend"),
 
                 c(HttpMethod.POST, API_V1_AUTH_PASSWORD_FORGOT, "/api/v1/auth/password/forgot"),

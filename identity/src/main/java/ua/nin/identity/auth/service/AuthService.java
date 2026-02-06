@@ -52,10 +52,10 @@ public class AuthService {
         String username = req.username().trim();
 
         if (userRepository.existsByEmail(email)) {
-            throw new EmailAlreadyExistsException("Email already exists");
+            throw new EmailAlreadyExistsException(EMAIL_ALREADY_EXISTS);
         }
         if (profileRepository.existsByUsername(username)) {
-            throw new UsernameAlreadyExistsException("Username already exists");
+            throw new UsernameAlreadyExistsException(USERNAME_ALREADY_EXISTS);
         }
 
         User user = User.builder()
