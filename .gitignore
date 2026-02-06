@@ -32,4 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
+### Local video storage ###
 /storage/
+
+### .env secrets ###
+.env
