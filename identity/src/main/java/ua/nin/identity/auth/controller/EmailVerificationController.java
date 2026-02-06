@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.nin.identity.auth.dto.ResendVerifyRequest;
-import ua.nin.identity.auth.dto.VerifyEmailRequest;
 import ua.nin.identity.auth.service.EmailVerificationService;
 
 @RestController
@@ -15,10 +14,10 @@ public class EmailVerificationController {
 
     private final EmailVerificationService emailVerificationService;
 
-    @PostMapping("/verify")
-    public ResponseEntity<Void> verify(@Valid @RequestBody VerifyEmailRequest req) {
-        emailVerificationService.verify(req.token());
-        return ResponseEntity.noContent().build();
+    @GetMapping("/verify")
+    public ResponseEntity<Void> verify(@Valid @RequestParam(name = "token") String verifyEmailToken) {
+        emailVerificationService.verify(verifyEmailToken);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/resend")
