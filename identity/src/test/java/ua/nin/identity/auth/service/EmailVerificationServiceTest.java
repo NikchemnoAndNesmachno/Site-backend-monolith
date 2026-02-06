@@ -33,6 +33,8 @@ class EmailVerificationServiceTest {
     private EmailVerificationTokenRepository tokenRepository;
     @Mock
     private TimeTokenUtils timeTokenUtils;
+    @Mock
+    private EmailSenderService emailSenderService;
 
     @InjectMocks
     private EmailVerificationService emailVerificationService;
