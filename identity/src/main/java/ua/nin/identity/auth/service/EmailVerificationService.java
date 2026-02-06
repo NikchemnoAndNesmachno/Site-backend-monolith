@@ -28,6 +28,8 @@ public class EmailVerificationService {
     @Value("${security.email-verify.ttl-minutes:60}")
     private long verifyTtlMinutes;
 
+    private final EmailSenderService emailSenderService;
+
     /**
      * VERIFY:
      * - token -> hash -> знаходимо запис
@@ -71,8 +73,8 @@ public class EmailVerificationService {
     public void send(User user) {
         String email = user.getEmail();
 
-        String normalized = StringHelperUtils.normalizeEmail(email);
-        if (normalized == null) return;
+        String normalizedEmail = StringHelperUtils.normalizeEmail(email);
+        if (normalizedEmail == null) return;
 
         String raw = timeTokenUtils.generateRawToken();
         String hash = timeTokenUtils.hash(raw);
@@ -88,8 +90,7 @@ public class EmailVerificationService {
 
         tokenRepository.save(token);
 
-        // TODO: EmailService -> відправити лист з raw токеном (або лінком)
-        System.out.println("[DEV] Email verify token for " + normalized + ": " + raw);
+        emailSenderService.sendEmailVerification(normalizedEmail, raw);
     }
 
     /**
@@ -99,10 +100,10 @@ public class EmailVerificationService {
      */
     @Transactional
     public void resend(String email) {
-        String normalized = StringHelperUtils.normalizeEmail(email);
-        if (normalized == null) return;
+        String normalizedEmail = StringHelperUtils.normalizeEmail(email);
+        if (normalizedEmail == null) return;
 
-        Optional<User> userOpt = userRepository.findByEmail(normalized);
+        Optional<User> userOpt = userRepository.findByEmail(normalizedEmail);
         if (userOpt.isEmpty()) {
             return; // не палимо існування email
         }
@@ -128,7 +129,6 @@ public class EmailVerificationService {
 
         tokenRepository.save(token);
 
-        // TODO: EmailService -> відправити лист з raw токеном (або лінком)
-        System.out.println("[DEV] Email verify token for " + normalized + ": " + raw);
+        emailSenderService.sendEmailVerification(normalizedEmail, raw);
     }
 }
