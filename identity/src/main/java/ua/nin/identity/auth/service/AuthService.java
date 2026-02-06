@@ -52,10 +52,10 @@ public class AuthService {
         String username = req.username().trim();
 
         if (userRepository.existsByEmail(email)) {
-            throw new ConflictException(EMAIL_ALREADY_EXISTS);
+            throw new EmailAlreadyExistsException("Email already exists");
         }
         if (profileRepository.existsByUsername(username)) {
-            throw new ConflictException(USERNAME_ALREADY_EXISTS);
+            throw new UsernameAlreadyExistsException("Username already exists");
         }
 
         User user = User.builder()
@@ -74,6 +74,7 @@ public class AuthService {
                 .build();
         credentialRepository.save(cred);
 
+        /// ///// TODO: Use Contract-API to create new profile for user
         Profile profile = Profile.builder()
                 .user(user)
                 .username(username)
@@ -81,8 +82,8 @@ public class AuthService {
                 .privacy(Privacy.PUBLIC)
                 .build();
         profileRepository.save(profile);
+        /// /////
 
-        // Тут потім підключиш email verification (хвиля 2)
         emailVerificationService.send(user);
     }
 
