@@ -30,16 +30,33 @@ spring:
           lob:
             non_contextual_creation: true
 
-  # Media config
-  servlet:
-    multipart:
-      max-file-size: 100MB
-      max-request-size: 120MB
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nikchemno.nesmachno@gmail.com
+    password: ${GMAIL_APP_PASSWORD}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.debug: true
 
 # Logging
 logging:
   level:
     org.springframework.security: DEBUG
+    org.eclipse.angus.mail: DEBUG
+    org.springframework.mail: DEBUG
+
+app:
+  mail:
+    from: "NiN <nikchemno.nesmachno@gmail.com>"
+  public-base-url: "http://localhost:8080"
+
+  # Media config
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 120MB
 
 # Identity token security
 jwt:
