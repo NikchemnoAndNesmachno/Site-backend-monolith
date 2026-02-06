@@ -27,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static ua.nin.common.constant.ErrorMessage.EMAIL_ALREADY_EXISTS;
+import static ua.nin.common.constant.ErrorMessage.USERNAME_ALREADY_EXISTS;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -61,8 +63,8 @@ class AuthServiceTest {
         doReturn(true).when(userRepository).existsByEmail(request.email());
 
         assertThatThrownBy(() -> authService.register(request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("Email already exists");
+                .isInstanceOf(EmailAlreadyExistsException.class)
+                .hasMessageContaining(EMAIL_ALREADY_EXISTS);
 
         verify(userRepository).existsByEmail("test@gmail.com");
         verifyNoMoreInteractions(userRepository);
@@ -78,8 +80,8 @@ class AuthServiceTest {
         doReturn(true).when(profileRepository).existsByUsername(request.username());
 
         assertThatThrownBy(() -> authService.register(request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessageContaining("Username already exists");
+                .isInstanceOf(UsernameAlreadyExistsException.class)
+                .hasMessageContaining(USERNAME_ALREADY_EXISTS);
 
         verify(userRepository).existsByEmail("test@gmail.com");
         verify(profileRepository).existsByUsername("test");
