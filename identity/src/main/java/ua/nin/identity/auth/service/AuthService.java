@@ -20,6 +20,7 @@ import ua.nin.identity.profile.model.Privacy;
 import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
 
+import static ua.nin.common.constant.ErrorMessage.*;
 import static ua.nin.common.util.StringHelperUtils.normalizeEmail;
 
 import java.time.Instant;
@@ -92,18 +93,18 @@ public class AuthService {
         String email = normalizeEmail(req.email());
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+                .orElseThrow(() -> new BadCredentialsException(INVALID_CREDENTIALS));
 
         if (user.getStatus() == Status.BANNED || user.getStatus() == Status.DELETED) {
-            throw new ForbiddenException("User is not allowed to login");
+            throw new ForbiddenException(FORBIDDEN_LOGIN);
         }
 
         Credential cred = credentialRepository.findById(user.getId())
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+                .orElseThrow(() -> new BadCredentialsException(INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(req.password(), cred.getPasswordHash())) {
             cred.incrementFailedLoginAttempts();
-            throw new BadCredentialsException("Invalid credentials");
+            throw new BadCredentialsException(INVALID_CREDENTIALS);
         }
 
         // optional: last_login_at
@@ -172,7 +173,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public MeResponse me(long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(USER_NOT_FOUND));
 
         return meResponseMapper.toDto(user);
     }

@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record PutReactionRequest(
         @NotBlank @Size(max = 64)
         // твій формат: POSTS, COMMENTS, VIDEOS і т.д. - Вибери один стиль і тримай його

@@ -17,10 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import static ua.nin.common.constant.StringEndpoints.*;
+import static ua.nin.common.constant.AppConstant.ADMIN;
+import static ua.nin.common.constant.AppConstant.USER;
 
 @Configuration
 @EnableWebSecurity
@@ -36,22 +39,34 @@ public class SecurityConfig {
         var p = PathPatternRequestMatcher.withDefaults();
 
         return new OrRequestMatcher(
-                p.matcher(HttpMethod.POST, "/api/v1/auth/register"),
-                p.matcher(HttpMethod.POST, "/api/v1/auth/login"),
-                p.matcher(HttpMethod.POST, "/api/v1/auth/logout"),
-                p.matcher(HttpMethod.POST, "/api/v1/auth/refresh"),
-                p.matcher(HttpMethod.POST, "/api/v1/auth/email/verify"),
-                p.matcher(HttpMethod.POST, "/api/v1/auth/email/resend"),
-                p.matcher(HttpMethod.POST, "/api/v1/auth/password/forgot"),
-                p.matcher(HttpMethod.POST, "/api/v1/auth/password/reset"),
+                p.matcher(HttpMethod.POST, API_V1_AUTH_REGISTER),
+                p.matcher(HttpMethod.POST, API_V1_AUTH_LOGIN),
+                p.matcher(HttpMethod.POST, API_V1_AUTH_LOGOUT),
+                p.matcher(HttpMethod.POST, API_V1_AUTH_REFRESH),
 
-                p.matcher(HttpMethod.GET, "/api/v1/auth/media/*"),
+                p.matcher(HttpMethod.POST, API_V1_AUTH_EMAIL_VERIFY),
+                p.matcher(HttpMethod.POST, API_V1_AUTH_EMAIL_RESEND),
 
-                // будь-який
-                p.matcher("/actuator/**"),
-                p.matcher("/v3/api-docs/**"),
-                p.matcher("/swagger-ui/**"),
-                p.matcher("/swagger-ui.html"),
+                p.matcher(HttpMethod.POST, API_V1_AUTH_PASSWORD_FORGOT),
+                p.matcher(HttpMethod.POST, API_V1_AUTH_PASSWORD_RESET),
+
+                p.matcher(HttpMethod.GET, API_V1_USERS_BY_USERNAME),
+
+                p.matcher(HttpMethod.GET, API_V1_MEDIA_BY_ID),
+                p.matcher(HttpMethod.GET, API_V1_MEDIA_BY_ID_META),
+
+                p.matcher(HttpMethod.GET, API_V1_REACTIONS_BY_TARGET_TYPE_BY_TARGET_ID_COUNTS),
+
+                p.matcher(HttpMethod.GET, API_V1_COMMENTS),
+                p.matcher(HttpMethod.GET, API_V1_COMMENTS_BY_PARENT_ID_REPLIES),
+
+                p.matcher(HttpMethod.GET, API_V1_VIEWS),
+                p.matcher(HttpMethod.POST, API_V1_VIEWS),
+
+                p.matcher(ACTUATOR),
+                p.matcher(V3_API_DOCS),
+                p.matcher(SWAGGER_UI),
+                p.matcher(SWAGGER_UI_HTML),
 
                 p.matcher(HttpMethod.OPTIONS, "/**")
         );
@@ -84,16 +99,32 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         // --- Protected endpoints ---
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout-all").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, API_V1_AUTH_ME).hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.POST, API_V1_AUTH_LOGOUT_ALL).hasAnyRole(USER, ADMIN)
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/password/change").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/v1/auth/sessions/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, API_V1_AUTH_PASSWORD_CHANGE).hasAnyRole(USER, ADMIN)
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/video/upload/video-with-preview").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/media/upload").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, API_V1_USERS_ME).hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.PATCH, API_V1_USERS_ME).hasAnyRole(USER, ADMIN)
+
+                        .requestMatchers(HttpMethod.POST, API_V1_MEDIA_UPLOAD).hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, API_V1_MEDIA_BY_ID).hasAnyRole(ADMIN)
+
+                        .requestMatchers(HttpMethod.POST, API_V1_AVATAR_UPLOAD).hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, API_V1_AVATAR_BY_ID).hasAnyRole(USER, ADMIN)
+
+                        .requestMatchers(HttpMethod.POST, API_V1_VIDEO_UPLOAD_WITH_PREVIEW).hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, API_V1_VIDEO_BY_ID).hasAnyRole(USER, ADMIN)
+
+                        .requestMatchers(HttpMethod.PUT, API_V1_REACTIONS).hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.GET, API_V1_REACTIONS_BY_TARGET_TYPE_BY_TARGET_ID_MY).hasAnyRole(USER, ADMIN)
+
+                        .requestMatchers(HttpMethod.POST, API_V1_COMMENTS).hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.PATCH, API_V1_COMMENTS_BY_ID).hasAnyRole(USER, ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, API_V1_COMMENTS_BY_ID).hasAnyRole(USER, ADMIN)
+
                         // все інше — за замовчуванням закрите
-                        .anyRequest().hasAnyRole("USER", "ADMIN")
+                        .anyRequest().hasAnyRole(ADMIN)
                 )
                 // JWT access token validation
                 .oauth2ResourceServer(oauth2 -> oauth2
