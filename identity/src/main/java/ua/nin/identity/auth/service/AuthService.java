@@ -7,10 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.nin.identity.auth.dto.*;
-import ua.nin.identity.auth.exception.exceptions.BadCredentialsException;
-import ua.nin.identity.auth.exception.exceptions.ConflictException;
-import ua.nin.identity.auth.exception.exceptions.ForbiddenException;
-import ua.nin.identity.auth.exception.exceptions.NotFoundException;
+import ua.nin.identity.auth.exception.exceptions.*;
 import ua.nin.identity.auth.mapper.MeResponseMapper;
 import ua.nin.identity.auth.model.Credential;
 import ua.nin.identity.auth.model.Role;
@@ -54,10 +51,10 @@ public class AuthService {
         String username = req.username().trim();
 
         if (userRepository.existsByEmail(email)) {
-            throw new ConflictException("Email already exists");
+            throw new EmailAlreadyExistsException("Email already exists");
         }
         if (profileRepository.existsByUsername(username)) {
-            throw new ConflictException("Username already exists");
+            throw new UsernameAlreadyExistsException("Username already exists");
         }
 
         User user = User.builder()
@@ -76,6 +73,7 @@ public class AuthService {
                 .build();
         credentialRepository.save(cred);
 
+        /// ///// TODO: Use Contract-API to create new profile for user
         Profile profile = Profile.builder()
                 .user(user)
                 .username(username)
@@ -83,8 +81,8 @@ public class AuthService {
                 .privacy(Privacy.PUBLIC)
                 .build();
         profileRepository.save(profile);
+        /// /////
 
-        // Тут потім підключиш email verification (хвиля 2)
         emailVerificationService.send(user);
     }
 
