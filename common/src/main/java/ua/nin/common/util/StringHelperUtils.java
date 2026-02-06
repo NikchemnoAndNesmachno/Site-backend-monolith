@@ -2,11 +2,9 @@ package ua.nin.common.util;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-@Component
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StringHelperUtils {
 
