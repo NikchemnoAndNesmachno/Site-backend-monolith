@@ -8,7 +8,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import ua.nin.identity.auth.service.HttpCookieService;
 import ua.nin.identity.auth.service.OAuth2SuccessHandler;
+import ua.nin.identity.auth.util.TimeTokenUtils;
 
 import java.util.stream.Stream;
 
@@ -23,12 +25,18 @@ class PublicMatcherParameterizedTest {
     private JwtAuthenticationConverter jwtAuthenticationConverter;
     @Mock
     private OAuth2SuccessHandler oAuth2SuccessHandler;
+    @Mock
+    private TimeTokenUtils timeTokenUtils;
+    @Mock
+    private HttpCookieService httpCookieService;
 
     // publicMatcher() не використовує jwtDecoder/converter, тому можна надати заглушки.
     private final RequestMatcher publicMatcher = new SecurityConfig(
             jwtDecoder,
             jwtAuthenticationConverter,
-            oAuth2SuccessHandler
+            oAuth2SuccessHandler,
+            timeTokenUtils,
+            httpCookieService
     ).publicMatcher();
 
     // ---------- helpers ----------

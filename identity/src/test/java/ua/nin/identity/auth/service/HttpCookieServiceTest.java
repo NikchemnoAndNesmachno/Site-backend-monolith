@@ -10,7 +10,7 @@ class HttpCookieServiceTest {
 
     @Test
     void setRefreshCookie_writesHttpOnlyCookie() {
-        HttpCookieService service = new HttpCookieService();
+        HttpCookieService service = new HttpCookieService(14L, false);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         service.setRefreshCookie(response, "token");
@@ -25,7 +25,7 @@ class HttpCookieServiceTest {
 
     @Test
     void clearRefreshCookie_setsExpiredCookie() {
-        HttpCookieService service = new HttpCookieService();
+        HttpCookieService service = new HttpCookieService(14L, false);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         service.clearRefreshCookie(response);
