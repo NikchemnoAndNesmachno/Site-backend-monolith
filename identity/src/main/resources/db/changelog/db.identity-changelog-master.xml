@@ -13,6 +13,7 @@
     <include file="/db/changelog/logs/050_refresh_tokens.xml"/>
     <include file="/db/changelog/logs/060_email_verification_tokens.xml"/>
     <include file="/db/changelog/logs/070_password_reset_tokens.xml"/>
+    <include file="/db/changelog/logs/080_oauth2_identities.xml"/>
 
 </databaseChangeLog>
 

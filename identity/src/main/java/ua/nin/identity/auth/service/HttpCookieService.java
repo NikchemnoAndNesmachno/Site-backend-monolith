@@ -1,6 +1,7 @@
 package ua.nin.identity.auth.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -9,18 +10,20 @@ import org.springframework.stereotype.Service;
 public class HttpCookieService {
     public static final String REFRESH_COOKIE = "refresh_token";
 
-    // TODO: поставити собі ці значення з config
-    private static final int REFRESH_TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days
-    // у dev можна false
-    private static final boolean HTTP_COOKIE_SECURE = false;
+    @Value("${security.refresh.ttl-days:14}")
+    private long refreshTtlDays;
+
+    @Value("${security.refresh.secure}")
+    private boolean httpCookieSecure = false;
 
     public void setRefreshCookie(HttpServletResponse response, String token) {
+        long refreshTtlSeconds = refreshTtlDays * 24 * 60 * 60;
 
         ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE, token)
                 .httpOnly(true)
-                .secure(HTTP_COOKIE_SECURE)
+                .secure(httpCookieSecure)
                 .path("/api/v1/auth/refresh")
-                .maxAge(REFRESH_TTL_SECONDS)
+                .maxAge(refreshTtlSeconds)
                 .sameSite("Lax")
                 .build();
 
@@ -30,7 +33,7 @@ public class HttpCookieService {
     public void clearRefreshCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH_COOKIE, "")
                 .httpOnly(true)
-                .secure(HTTP_COOKIE_SECURE)
+                .secure(httpCookieSecure)
                 .path("/api/v1/auth/refresh")
                 .maxAge(0)
                 .sameSite("Lax")

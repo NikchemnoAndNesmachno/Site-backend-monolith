@@ -9,16 +9,16 @@ spring:
   # Datasource
   datasource:
     url: jdbc:postgresql://localhost:5431/NiN
-    username: postgres
-    password: postgres
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   # Liquibase
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.xml
     enabled: true
-    user: postgres
-    password: postgres
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   # Hibernate
   jpa:
@@ -39,6 +39,35 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
       mail.debug: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            scope: [openid, profile, email]
+            authorization-grant-type: authorization_code
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+#          github:
+#            redirect-uri: http://localhost:8080/login/oauth2/code/github
+#            client-id: ${GITHUB_CLIENT_ID}
+#            client-secret: ${GITHUB_CLIENT_SECRET}
+#            scope: read:user, user:email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+#          github:
+#            authorization-uri: https://github.com/login/oauth/authorize
+#            token-uri: https://github.com/login/oauth/access_token
+#            user-info-uri: https://api.github.com/user
+#            user-name-attribute: id
+  # Media config
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 120MB
 
 # Logging
 logging:
@@ -52,21 +81,17 @@ app:
     from: "NiN <nikchemno.nesmachno@gmail.com>"
   public-base-url: "http://localhost:8080"
 
-  # Media config
-  servlet:
-    multipart:
-      max-file-size: 100MB
-      max-request-size: 120MB
-
 # Identity token security
 jwt:
-  secret: "dev-secret-change-measdasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111"
+  secret: ${JWT_SECRET}
 
 security:
   refresh:
     ttl-days: 14
-    bytes: 64
-    pepper: "CHANGE_ME_LONG_RANDOM"
+    secure: false
+  ott:
+    bytes: 32
+    pepper: ${OTT_PEPPER}
 
 # Media config
 media:

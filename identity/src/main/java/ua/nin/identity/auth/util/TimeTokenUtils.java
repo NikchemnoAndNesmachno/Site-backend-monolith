@@ -16,10 +16,10 @@ public class TimeTokenUtils {
 
     private final SecureRandom secureRandom;
 
-    @Value("${security.ott.bytes:48}")
+    @Value("${security.ott.bytes:32}")
     private int bytes;
 
-    @Value("${security.refresh.pepper:CHANGE_ME}")
+    @Value("${security.ott.pepper:CHANGE_ME}")
     private String pepper;
 
     public String generateRawToken() {
