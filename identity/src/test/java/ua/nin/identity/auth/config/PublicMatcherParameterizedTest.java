@@ -2,11 +2,15 @@ package ua.nin.identity.auth.config;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import ua.nin.identity.auth.service.HttpCookieService;
+import ua.nin.identity.auth.service.OAuth2SuccessHandler;
+import ua.nin.identity.auth.util.TimeTokenUtils;
 
 import java.util.stream.Stream;
 
@@ -15,10 +19,24 @@ import static ua.nin.common.constant.StringEndpoints.*;
 
 class PublicMatcherParameterizedTest {
 
+    @Mock
+    private JwtDecoder jwtDecoder;
+    @Mock
+    private JwtAuthenticationConverter jwtAuthenticationConverter;
+    @Mock
+    private OAuth2SuccessHandler oAuth2SuccessHandler;
+    @Mock
+    private TimeTokenUtils timeTokenUtils;
+    @Mock
+    private HttpCookieService httpCookieService;
+
     // publicMatcher() не використовує jwtDecoder/converter, тому можна надати заглушки.
     private final RequestMatcher publicMatcher = new SecurityConfig(
-            (JwtDecoder) token -> { throw new UnsupportedOperationException(); },
-            new JwtAuthenticationConverter()
+            jwtDecoder,
+            jwtAuthenticationConverter,
+            oAuth2SuccessHandler,
+            timeTokenUtils,
+            httpCookieService
     ).publicMatcher();
 
     // ---------- helpers ----------
@@ -61,6 +79,10 @@ class PublicMatcherParameterizedTest {
                 // views
                 c(HttpMethod.GET, API_V1_VIEWS, "/api/v1/views"),
                 c(HttpMethod.POST, API_V1_VIEWS, "/api/v1/views"),
+
+                // OAuth2
+                c(HttpMethod.GET, "/login/oauth2/code/**", "/login/oauth2/code/google"),
+                c(HttpMethod.GET, "/oauth2/authorization/**", "/oauth2/authorization/google"),
 
                 // actuator + swagger
                 c(null, ACTUATOR, "/actuator/health"),

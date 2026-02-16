@@ -36,7 +36,7 @@ class AuthControllerTest {
     private AuthService authService;
 
     @Spy
-    private HttpCookieService httpCookieService = new HttpCookieService();
+    private HttpCookieService httpCookieService = new HttpCookieService(14L, false);
 
     @InjectMocks
     private AuthController authController;

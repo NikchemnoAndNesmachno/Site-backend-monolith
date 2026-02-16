@@ -1,7 +1,6 @@
 package ua.nin.identity.auth.util;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.security.SecureRandom;
 
@@ -11,9 +10,7 @@ class TimeTokenUtilsTest {
 
     @Test
     void generateRawToken_uniqueAndNonEmpty() {
-        TimeTokenUtils utils = new TimeTokenUtils(new SecureRandom());
-        ReflectionTestUtils.setField(utils, "bytes", 32);
-        ReflectionTestUtils.setField(utils, "pepper", "pepper");
+        TimeTokenUtils utils = new TimeTokenUtils(new SecureRandom(), 32, "pepper", "secret");
 
         String token1 = utils.generateRawToken();
         String token2 = utils.generateRawToken();
@@ -25,8 +22,7 @@ class TimeTokenUtilsTest {
 
     @Test
     void hash_isDeterministicAndNotRaw() {
-        TimeTokenUtils utils = new TimeTokenUtils(new SecureRandom());
-        ReflectionTestUtils.setField(utils, "pepper", "pepper");
+        TimeTokenUtils utils = new TimeTokenUtils(new SecureRandom(), 32, "pepper", "secret");
 
         String hash1 = utils.hash("raw");
         String hash2 = utils.hash("raw");

@@ -14,12 +14,18 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import ua.nin.identity.auth.oauth2.state.CookieAuthorizationRequestRepository;
+import ua.nin.identity.auth.service.HttpCookieService;
+import ua.nin.identity.auth.service.OAuth2SuccessHandler;
+import ua.nin.identity.auth.util.TimeTokenUtils;
 
 import static ua.nin.common.constant.StringEndpoints.*;
 import static ua.nin.common.constant.AppConstant.ADMIN;
@@ -33,6 +39,9 @@ public class SecurityConfig {
 
     private final JwtDecoder jwtDecoder;
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final TimeTokenUtils timeTokenUtils;
+    private final HttpCookieService httpCookieService;
 
     @Bean
     public RequestMatcher publicMatcher() {
@@ -63,6 +72,9 @@ public class SecurityConfig {
                 p.matcher(HttpMethod.GET, API_V1_VIEWS),
                 p.matcher(HttpMethod.POST, API_V1_VIEWS),
 
+                p.matcher(HttpMethod.GET, "/login/oauth2/code/**"),
+                p.matcher(HttpMethod.GET, "/oauth2/authorization/**"),
+
                 p.matcher(ACTUATOR),
                 p.matcher(V3_API_DOCS),
                 p.matcher(SWAGGER_UI),
@@ -83,7 +95,13 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(a -> a.anyRequest().permitAll());
+                .authorizeHttpRequests(a -> a.anyRequest().permitAll())
+                .oauth2Login(o -> o
+                        .authorizationEndpoint(ae -> ae
+                                .authorizationRequestRepository(authorizationRequestRepository())
+                        )
+                        .successHandler(oAuth2SuccessHandler)
+                );
 
         return http.build();
     }
@@ -143,5 +161,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
+    }
+
+    @Bean
+    public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
+        return new CookieAuthorizationRequestRepository(timeTokenUtils, httpCookieService);
     }
 }

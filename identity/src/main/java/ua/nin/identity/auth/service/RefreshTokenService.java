@@ -19,6 +19,8 @@ import ua.nin.identity.auth.util.TimeTokenUtils;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import static ua.nin.common.util.StringHelperUtils.normalizeAndTruncate;
+
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
@@ -47,7 +49,7 @@ public class RefreshTokenService {
 
         RefreshTokenFamily family = RefreshTokenFamily.builder()
                 .user(user)
-                .userAgent(trimOrNull(userAgent, 512))
+                .userAgent(normalizeAndTruncate(userAgent, 512))
                 .ip(InetAddressUtils.parseIp(ip))
                 .build();
 
@@ -129,7 +131,7 @@ public class RefreshTokenService {
         refreshTokenRepository.save(current);
 
         // 6) оновлюємо метадані family
-        familyRepository.touch(family.getId(), now, trimOrNull(userAgent, 512), InetAddressUtils.parseIp(ip));
+        familyRepository.touch(family.getId(), now, normalizeAndTruncate(userAgent, 512), InetAddressUtils.parseIp(ip));
 
         return new RefreshIssueResult(newRaw, family.getId());
     }
@@ -175,14 +177,5 @@ public class RefreshTokenService {
     private void revokeFamilyInternal(long familyId, Instant now) {
         familyRepository.revokeFamily(familyId, now);
         refreshTokenRepository.revokeAllInFamily(familyId, now);
-    }
-
-    // ---- helpers ----
-
-    private static String trimOrNull(String s, int max) {
-        if (s == null) return null;
-        String t = s.trim();
-        if (t.isEmpty()) return null;
-        return t.length() <= max ? t : t.substring(0, max);
     }
 }
