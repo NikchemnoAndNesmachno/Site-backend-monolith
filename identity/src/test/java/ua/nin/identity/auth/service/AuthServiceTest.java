@@ -123,7 +123,7 @@ class AuthServiceTest {
 
         ArgumentCaptor<Profile> profileCaptor = ArgumentCaptor.forClass(Profile.class);
         verify(profileRepository).save(profileCaptor.capture());
-        assertSame(userCaptor.getValue(), profileCaptor.getValue().getUser());
+        assertSame(userCaptor.getValue().getId(), profileCaptor.getValue().getUserId());
         assertEquals("test", profileCaptor.getValue().getUsername());
         assertEquals("test", profileCaptor.getValue().getDisplayName());
         assertEquals(Privacy.PUBLIC, profileCaptor.getValue().getPrivacy());
