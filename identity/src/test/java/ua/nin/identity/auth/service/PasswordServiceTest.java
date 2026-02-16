@@ -42,6 +42,8 @@ class PasswordServiceTest {
     private TimeTokenUtils timeTokenUtils;
     @Mock
     private RefreshTokenService refreshTokenService;
+    @Mock
+    private EmailSenderService emailSenderService;
 
     @InjectMocks
     private PasswordService passwordService;
@@ -79,6 +81,7 @@ class PasswordServiceTest {
         ArgumentCaptor<PasswordResetToken> captor = ArgumentCaptor.forClass(PasswordResetToken.class);
         verify(passwordResetTokenRepository).save(captor.capture());
         assertEquals("hash", captor.getValue().getTokenHash());
+        verify(emailSenderService).sendForgotPassword("user@site.com", "raw");
     }
 
     @Test

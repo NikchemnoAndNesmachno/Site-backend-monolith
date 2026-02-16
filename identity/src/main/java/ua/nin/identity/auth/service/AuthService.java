@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.nin.contract.profile.ProfileCreation;
 import ua.nin.identity.auth.dto.*;
 import ua.nin.identity.auth.exception.exceptions.*;
 import ua.nin.identity.auth.mapper.MeResponseMapper;
@@ -41,6 +42,7 @@ public class AuthService {
     private final EmailVerificationService emailVerificationService;
 
     private final MeResponseMapper meResponseMapper;
+    private final ProfileCreation profileCreation;
 
     @Value("${jwt.access-ttl-minutes:10}")
     private long accessTtlMinutes;
@@ -74,15 +76,7 @@ public class AuthService {
                 .build();
         credentialRepository.save(cred);
 
-        /// ///// TODO: Use Contract-API to create new profile for user
-        Profile profile = Profile.builder()
-                .user(user)
-                .username(username)
-                .displayName(username)
-                .privacy(Privacy.PUBLIC)
-                .build();
-        profileRepository.save(profile);
-        /// /////
+        profileCreation.createProfile(user.getId(), username);
 
         emailVerificationService.send(user);
     }

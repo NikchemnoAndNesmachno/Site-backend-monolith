@@ -19,12 +19,6 @@ public class Profile {
     @Column(name="user_id")
     private Long userId;
 
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id")
-    @ToString.Exclude
-    private User user;
-
     @Column(name = "username", nullable = false, length = 64)
     private String username;
 

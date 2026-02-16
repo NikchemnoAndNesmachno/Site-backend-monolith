@@ -27,6 +27,7 @@ public class ReactionCount {
     @Getter @Setter
     @NoArgsConstructor @AllArgsConstructor
     @Embeddable
+    @EqualsAndHashCode
     public static class ReactionCountId implements Serializable {
         @Column(name = "target_type", length = 32)
         private String targetType;

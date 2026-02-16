@@ -1,5 +1,6 @@
 package ua.nin.identity.auth.service;
 
 public interface EmailSenderService {
-    void sendEmailVerification(String to, String rawToken);
+    void sendEmailVerification(String email, String rawToken);
+    void sendForgotPassword(String email, String rawToken);
 }
