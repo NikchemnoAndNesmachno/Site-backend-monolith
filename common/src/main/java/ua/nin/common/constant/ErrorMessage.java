@@ -9,6 +9,7 @@ public final class ErrorMessage {
     public static final String VIDEO_NOT_FOUND = "Video not found";
     public static final String AVATAR_NOT_FOUND = "User avatar not found";
     public static final String USER_NOT_FOUND = "User not found";
+    public static final String PROFILE_NOT_FOUND = "Profile not found";
     public static final String FILE_NOT_FOUND = "File not found on storage";
     public static final String INVALID_CREDENTIALS  = "Invalid credentials";
     public static final String FORBIDDEN_LOGIN = "User is not allowed to login";
