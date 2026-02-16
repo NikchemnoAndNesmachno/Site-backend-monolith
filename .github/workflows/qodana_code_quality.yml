@@ -1,28 +1,36 @@
 name: Qodana
 on:
-  workflow_dispatch:
-  pull_request:
   push:
-    branches: # Specify your branches here
-      - main # The 'main' branch
-      - 'releases/*' # The release branches
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   qodana:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
       pull-requests: write
       checks: write
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
           fetch-depth: 0  # a full history is required for pull request analysis
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2025.3
         with:
-          pr-mode: false
+          pr-mode: ${{ github.event_name == 'pull_request' }}
+          upload-result: true
+          use-caches: true
+          cache-default-branch-only: true
+          primary-cache-key: qodana-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('**/pom.xml') }}
+          additional-cache-key: qodana-${{ runner.os }}-${{ github.ref_name }}
+          cache-dir: ${{ runner.temp }}/qodana/caches
+          args: --baseline,qodana.sarif.json
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1016867356 }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
