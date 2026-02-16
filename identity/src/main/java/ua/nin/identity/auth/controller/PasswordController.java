@@ -25,8 +25,9 @@ public class PasswordController {
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<Void> reset(@Valid @RequestBody ResetPasswordRequest req) {
-        passwordService.reset(req.token(), req.newPassword());
+    public ResponseEntity<Void> reset(@Valid @RequestParam(name = "token") String resetPasswordToken,
+                                      @Valid @RequestBody ResetPasswordRequest req) {
+        passwordService.reset(resetPasswordToken, req.newPassword());
         return ResponseEntity.noContent().build();
     }
 

@@ -57,7 +57,7 @@ public class Oauth2ProvisionService {
             createProfileIfMissing(user, dto, now);
         } else {
             // if was PENDING_EMAIL, but now is verified through OAuth — do ACTIVE
-            if (Status.PENDING_EMAIL.equals(user.getStatus()) && dto.emailVerified()) {
+            if (Status.PENDING_EMAIL.equals(user.getStatus())) {
                 user.setStatus(Status.ACTIVE);
                 user.setUpdatedAt(now);
                 userRepository.save(user);
@@ -105,7 +105,7 @@ public class Oauth2ProvisionService {
         String username = uniqueUsername(base);
 
         Profile p = new Profile();
-        p.setUser(user);
+        p.setUserId(user.getId());
         p.setUsername(username);
         p.setDisplayName(dto.name());
         p.setBio(null);

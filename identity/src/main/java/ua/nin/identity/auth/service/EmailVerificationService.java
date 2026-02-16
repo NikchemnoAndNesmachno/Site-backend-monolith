@@ -25,7 +25,7 @@ public class EmailVerificationService {
     private final EmailVerificationTokenRepository tokenRepository;
     private final TimeTokenUtils timeTokenUtils;
 
-    @Value("${security.email-verify.ttl-minutes:60}")
+    @Value("${security.email-verify.ttl-minutes:30}")
     private long verifyTtlMinutes;
 
     private final EmailSenderService emailSenderService;

@@ -148,7 +148,7 @@ class Oauth2ProvisionServiceTest {
         // profile створюється
         verify(profileRepository).saveAndFlush(profileCaptor.capture());
         Profile p = profileCaptor.getValue();
-        assertThat(p.getUser().getId()).isEqualTo(5L);
+        assertThat(p.getUserId()).isEqualTo(5L);
         assertThat(p.getUsername()).isEqualTo("pending");
         assertThat(p.getDisplayName()).isEqualTo("Pending");
 

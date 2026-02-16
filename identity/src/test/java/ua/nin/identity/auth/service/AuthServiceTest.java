@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import ua.nin.contract.profile.ProfileCreation;
 import ua.nin.identity.auth.dto.*;
 import ua.nin.identity.auth.exception.exceptions.*;
 import ua.nin.identity.auth.mapper.MeResponseMapper;
@@ -19,6 +20,7 @@ import ua.nin.identity.auth.repository.UserRepository;
 import ua.nin.identity.profile.model.Privacy;
 import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
+import ua.nin.identity.profile.service.ProfileService;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,6 +44,8 @@ class AuthServiceTest {
     private CredentialRepository credentialRepository;
     @Mock
     private ProfileRepository profileRepository;
+    @Mock
+    private ProfileCreation profileCreation;
 
     @Mock
     private AccessTokenService accessTokenService;
@@ -120,13 +124,6 @@ class AuthServiceTest {
         assertSame(userCaptor.getValue(), credentialCaptor.getValue().getUser());
         assertEquals("encodedTest123", credentialCaptor.getValue().getPasswordHash());
         assertEquals(0, credentialCaptor.getValue().getFailedLoginAttempts());
-
-        ArgumentCaptor<Profile> profileCaptor = ArgumentCaptor.forClass(Profile.class);
-        verify(profileRepository).save(profileCaptor.capture());
-        assertSame(userCaptor.getValue(), profileCaptor.getValue().getUser());
-        assertEquals("test", profileCaptor.getValue().getUsername());
-        assertEquals("test", profileCaptor.getValue().getDisplayName());
-        assertEquals(Privacy.PUBLIC, profileCaptor.getValue().getPrivacy());
 
         ArgumentCaptor<User> userForEmailCaptor = ArgumentCaptor.forClass(User.class);
         verify(emailVerificationService).send(userForEmailCaptor.capture());

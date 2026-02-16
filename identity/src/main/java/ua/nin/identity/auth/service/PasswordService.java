@@ -34,6 +34,8 @@ public class PasswordService {
 
     private final RefreshTokenService refreshTokenService;
 
+    private final EmailSenderService emailSenderService;
+
     @Value("${security.password-reset.ttl-minutes:30}")
     private long resetTtlMinutes;
 
@@ -44,15 +46,16 @@ public class PasswordService {
      */
     @Transactional
     public void forgot(String email) {
-        String normalized = StringHelperUtils.normalizeEmail(email);
-        if (normalized == null) return;
+        String normalizedEmail = StringHelperUtils.normalizeEmail(email);
+        if (normalizedEmail == null) return;
 
-        Optional<User> userOpt = userRepository.findByEmail(normalized);
+        Optional<User> userOpt = userRepository.findByEmail(normalizedEmail);
         if (userOpt.isEmpty()) {
             return; // не палимо, що email не існує
         }
 
         User user = userOpt.get();
+
         if (user.getStatus() == Status.BANNED || user.getStatus() == Status.DELETED) {
             return; // також не палимо деталі
         }
@@ -61,6 +64,7 @@ public class PasswordService {
         String hash = timeTokenUtils.hash(raw);
 
         Instant now = Instant.now();
+
         PasswordResetToken token = PasswordResetToken.builder()
                 .user(user)
                 .tokenHash(hash)
@@ -70,9 +74,7 @@ public class PasswordService {
 
         passwordResetTokenRepository.save(token);
 
-        // TODO: інтегрувати EmailService
-        // В dev можна тимчасово логати:
-        System.out.println("[DEV] Password reset token for " + normalized + ": " + raw);
+        emailSenderService.sendForgotPassword(normalizedEmail, raw);
     }
 
     /**
