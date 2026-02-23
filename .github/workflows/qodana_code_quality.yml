@@ -8,7 +8,8 @@ on:
 
 jobs:
   qodana:
-    runs-on: ubuntu-latest
+    #    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     permissions:
       contents: write
@@ -28,7 +29,7 @@ jobs:
           use-caches: true
           cache-default-branch-only: true
           primary-cache-key: qodana-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('**/pom.xml') }}
-          additional-cache-key: qodana-${{ runner.os }}-${{ github.ref_name }}
+          additional-cache-key: qodana-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           cache-dir: ${{ runner.temp }}/qodana/caches
           args: --baseline,qodana.sarif.json
         env:
