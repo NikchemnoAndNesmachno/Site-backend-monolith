@@ -16,7 +16,8 @@ env:
 jobs:
 
   build:
-    runs-on: ubuntu-latest
+    #    runs-on: ubuntu-latest
+    runs-on: self-hosted
         
     # Add permissions to allow the GITHUB_TOKEN to write Check Runs
     permissions:
@@ -111,7 +112,8 @@ jobs:
         maven-args: -DskipTests
 
   docker-build:
-    runs-on: ubuntu-latest
+    #    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     permissions:
       checks: write
@@ -146,7 +148,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
   deploy:
-    runs-on: ubuntu-latest
+    #    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     permissions:
       checks: write
