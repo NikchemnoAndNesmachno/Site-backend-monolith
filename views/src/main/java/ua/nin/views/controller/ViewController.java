@@ -2,6 +2,7 @@ package ua.nin.views.controller;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import ua.nin.views.service.ViewService;
 @RestController
 @RequestMapping("/api/v1/views")
 @RequiredArgsConstructor
+@Slf4j
 public class ViewController {
 
     private final ViewService viewService;
@@ -24,6 +26,7 @@ public class ViewController {
             @RequestHeader(value = "X-Forwarded-For", required = false) String xff,
             @RequestHeader(value = "X-Real-IP", required = false) String xRealIp
     ) {
+        log.debug("Record view endpoint targetType={}, targetId={}", targetType, targetId);
         Long userId = null;
         if (auth != null && auth.isAuthenticated()) {
             try { userId = Long.parseLong(auth.getName()); } catch (Exception ignored) {}
@@ -39,6 +42,7 @@ public class ViewController {
             @RequestParam @NotBlank String targetType,
             @RequestParam long targetId
     ) {
+        log.debug("View counts endpoint targetType={}, targetId={}", targetType, targetId);
         return ResponseEntity.ok(viewService.getCounts(targetType, targetId));
     }
 

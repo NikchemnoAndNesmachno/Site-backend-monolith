@@ -1,6 +1,7 @@
 package ua.nin.media.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ import static ua.nin.media.util.MediaUtils.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MediaService {
 
     private final MediaAssetRepository assetRepository;

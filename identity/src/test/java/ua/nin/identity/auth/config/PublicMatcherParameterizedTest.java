@@ -92,7 +92,8 @@ class PublicMatcherParameterizedTest {
                 c(null, SWAGGER_UI_HTML, "/swagger-ui.html"),
 
                 // cors preflight
-                c(HttpMethod.OPTIONS, "/**", "/anything/here")
+                c(HttpMethod.OPTIONS, "/**", "/anything/here"),
+                c(null, "/error", "/error")
         );
     }
 

@@ -1,6 +1,7 @@
 package ua.nin.media.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,6 +13,7 @@ import ua.nin.media.service.UserAvatarService;
 @RestController
 @RequestMapping("/api/v1/avatar")
 @RequiredArgsConstructor
+@Slf4j
 public class UserAvatarController {
 
     private final UserAvatarService userAvatarService;
@@ -22,6 +24,7 @@ public class UserAvatarController {
             @RequestPart("avatar") MultipartFile avatar
     ) {
         long userId = Long.parseLong(authentication.getName());
+        log.debug("Authenticated userId={} requested avatar upload", userId);
         return ResponseEntity.ok(userAvatarService.uploadAvatar(userId, avatar));
     }
 
@@ -31,6 +34,7 @@ public class UserAvatarController {
             @PathVariable long avatarId
     ) {
         long userId = Long.parseLong(authentication.getName());
+        log.debug("Authenticated userId={} requested avatar deletion", userId);
         userAvatarService.deleteAvatar(userId, avatarId);
         return ResponseEntity.noContent().build();
     }
