@@ -28,11 +28,22 @@ public class AuthExceptionHandler {
     private final ErrorAttributes errorAttributes;
 
     private Map<String, Object> getErrorAttributes(WebRequest webRequest) {
-        Map<String, Object> map = new HashMap<>(errorAttributes.getErrorAttributes(webRequest,
-                ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE,
-                        ErrorAttributeOptions.Include.PATH)));
-        String path =  ((ServletWebRequest) webRequest).getRequest().getMethod() + " " + ((ServletWebRequest) webRequest).getRequest().getRequestURI();
-        map.put("path", path);
+        Map<String, Object> map = new HashMap<>(
+                errorAttributes.getErrorAttributes(
+                        webRequest,
+                        ErrorAttributeOptions.of(
+                                ErrorAttributeOptions.Include.MESSAGE,
+                                ErrorAttributeOptions.Include.PATH
+                        )
+                )
+        );
+
+        if (webRequest instanceof ServletWebRequest servletWebRequest) {
+            String path = servletWebRequest.getRequest().getMethod() + " "
+                    + servletWebRequest.getRequest().getRequestURI();
+            map.put("path", path);
+        }
+
         return map;
     }
 

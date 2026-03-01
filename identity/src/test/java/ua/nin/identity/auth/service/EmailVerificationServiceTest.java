@@ -8,6 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import ua.nin.identity.auth.exception.exceptions.InvalidTokenException;
+import ua.nin.identity.auth.exception.exceptions.MissingTokenException;
+import ua.nin.identity.auth.exception.exceptions.TokenExpiredException;
 import ua.nin.identity.auth.model.EmailVerificationToken;
 import ua.nin.identity.auth.model.Status;
 import ua.nin.identity.auth.model.User;
@@ -42,7 +44,7 @@ class EmailVerificationServiceTest {
     @Test
     void verify_missingToken_throws() {
         assertThatThrownBy(() -> emailVerificationService.verify(""))
-                .isInstanceOf(InvalidTokenException.class)
+                .isInstanceOf(MissingTokenException.class)
                 .hasMessageContaining("Missing verification token");
     }
 
@@ -56,7 +58,7 @@ class EmailVerificationServiceTest {
         when(tokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
 
         assertThatThrownBy(() -> emailVerificationService.verify("raw"))
-                .isInstanceOf(InvalidTokenException.class)
+                .isInstanceOf(TokenExpiredException.class)
                 .hasMessageContaining("expired");
     }
 

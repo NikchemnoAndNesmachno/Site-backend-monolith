@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import ua.nin.common.exception.response.ExceptionResponse;
 import ua.nin.common.logging.ErrorLogContext;
@@ -26,8 +27,23 @@ public class ProfileExceptionHandler {
     private final ErrorAttributes errorAttributes;
 
     private Map<String, Object> getErrorAttributes(WebRequest webRequest) {
-        return new HashMap<>(errorAttributes.getErrorAttributes(webRequest,
-                ErrorAttributeOptions.of(ErrorAttributeOptions.Include.MESSAGE)));
+        Map<String, Object> map = new HashMap<>(
+                errorAttributes.getErrorAttributes(
+                        webRequest,
+                        ErrorAttributeOptions.of(
+                                ErrorAttributeOptions.Include.MESSAGE,
+                                ErrorAttributeOptions.Include.PATH
+                        )
+                )
+        );
+
+        if (webRequest instanceof ServletWebRequest servletWebRequest) {
+            String path = servletWebRequest.getRequest().getMethod() + " "
+                    + servletWebRequest.getRequest().getRequestURI();
+            map.put("path", path);
+        }
+
+        return map;
     }
 
     private ErrorLogContext buildContext(WebRequest request, Exception ex) {
