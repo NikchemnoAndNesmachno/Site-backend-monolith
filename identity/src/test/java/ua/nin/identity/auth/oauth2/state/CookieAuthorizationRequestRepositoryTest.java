@@ -61,11 +61,11 @@ class CookieAuthorizationRequestRepositoryTest {
         repo.saveAuthorizationRequest(authReq, req, resp);
 
         verify(httpCookieService).addCookie(
-                resp,
-                OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
+                eq(resp),
+                eq(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME),
                 cookieValueCaptor.capture(),
-                OAUTH2_PATH,
-                180L // <-- ВАЖНО: long
+                eq(OAUTH2_PATH),
+                eq(180L)
         );
 
         String serialized = cookieValueCaptor.getValue();

@@ -95,7 +95,7 @@ class OAuth2SuccessHandlerTest {
                 .thenReturn(new IssueNewResult("raw.refresh.token", 55L));
 
         // access issue
-        when(accessTokenService.createAccessToken(777L, anyList()))
+        when(accessTokenService.createAccessToken(eq(777L), anyList()))
                 .thenReturn("access.jwt");
 
         // act
@@ -113,7 +113,7 @@ class OAuth2SuccessHandlerTest {
 
         // verify tokens + cookie
         verify(refreshTokenService).issueNew(user, "JUnit-UA", "203.0.113.10");
-        verify(accessTokenService).createAccessToken(777L, rolesCaptor.capture());
+        verify(accessTokenService).createAccessToken(eq(777L), rolesCaptor.capture());
         assertThat(rolesCaptor.getValue()).containsExactly("USER");
         verify(cookieService).setRefreshCookie(response, "raw.refresh.token");
 
