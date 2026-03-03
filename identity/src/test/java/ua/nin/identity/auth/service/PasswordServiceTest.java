@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 import ua.nin.identity.auth.exception.exceptions.BadCredentialsException;
 import ua.nin.identity.auth.exception.exceptions.InvalidTokenException;
+import ua.nin.identity.auth.exception.exceptions.MissingTokenException;
+import ua.nin.identity.auth.exception.exceptions.TokenExpiredException;
 import ua.nin.identity.auth.model.Credential;
 import ua.nin.identity.auth.model.PasswordResetToken;
 import ua.nin.identity.auth.model.Status;
@@ -87,7 +89,7 @@ class PasswordServiceTest {
     @Test
     void reset_missingToken_throws() {
         assertThatThrownBy(() -> passwordService.reset("", "newPass"))
-                .isInstanceOf(InvalidTokenException.class)
+                .isInstanceOf(MissingTokenException.class)
                 .hasMessageContaining("Missing reset token");
     }
 
@@ -101,7 +103,7 @@ class PasswordServiceTest {
         when(passwordResetTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
 
         assertThatThrownBy(() -> passwordService.reset("raw", "new"))
-                .isInstanceOf(InvalidTokenException.class)
+                .isInstanceOf(TokenExpiredException.class)
                 .hasMessageContaining("expired");
     }
 

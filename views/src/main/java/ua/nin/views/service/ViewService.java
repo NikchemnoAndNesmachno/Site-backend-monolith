@@ -1,10 +1,12 @@
 package ua.nin.views.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.nin.views.dto.ViewCountsResponse;
+import ua.nin.views.exception.exceptions.ViewerKeyHashException;
 import ua.nin.views.mapper.ViewCountsResponseMapper;
 import ua.nin.views.model.ViewCount;
 import ua.nin.views.repository.ViewCountRepository;
@@ -29,6 +31,7 @@ viewer key = "g:" + ip + "|" + userAgent (і обов'язково pepper/salt)
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ViewService {
 
     private final ViewUniqueRepository uniqueRepo;
@@ -43,9 +46,11 @@ public class ViewService {
 
     @Transactional
     public void recordView(String targetType, long targetId, Long userId, String userAgent, String ip) {
+        log.debug("Record view targetType={}, targetId={}, userId={}", targetType, targetId, userId);
         Instant now = Instant.now();
 
         String tType = normalizeTargetType(targetType);
+        log.debug("Normalized view targetType={}", tType);
         Instant bucketStart = bucketStartDayUtc(now);
 
         String viewerKey = buildViewerKey(userId, userAgent, ip);
@@ -53,12 +58,14 @@ public class ViewService {
 
         int inserted = uniqueRepo.insertUniqueIfAbsent(tType, targetId, viewerHash, bucketStart, now);
         long uniqueInc = inserted == 1 ? 1 : 0;
+        log.debug("Unique view inc={} ", uniqueInc);
 
         countRepo.upsertIncrement(tType, targetId, 1, uniqueInc);
     }
 
     @Transactional(readOnly = true)
     public ViewCountsResponse getCounts(String targetType, long targetId) {
+        log.debug("Get view counts targetType={}, targetId={}", targetType, targetId);
         String tType = normalizeTargetType(targetType);
 
         ViewCount viewCount = countRepo.findCountsByTarget(tType, targetId);
@@ -86,7 +93,8 @@ public class ViewService {
             for (byte b : digest) sb.append(String.format("%02x", b));
             return sb.toString();
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot hash viewer key", e);
+            log.error("Hash viewer key error {}", e.getMessage(), e);
+            throw new ViewerKeyHashException("Cannot hash viewer key", e);
         }
     }
 }

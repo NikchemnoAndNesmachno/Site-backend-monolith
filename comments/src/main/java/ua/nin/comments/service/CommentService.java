@@ -1,6 +1,7 @@
 package ua.nin.comments.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ import static ua.nin.common.util.StringHelperUtils.normalizeTargetType;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CommentService {
 
     @Value("${comments.max-depth:20}")
@@ -35,6 +37,7 @@ public class CommentService {
 
     @Transactional
     public CommentResponse create(long authorUserId, CreateCommentRequest req) {
+        log.debug("Create comment authorUserId={}, targetType={}, targetId={}", authorUserId, req.targetType(), req.targetId());
         String targetType = normalizeTargetType(req.targetType());
         Long targetId = req.targetId();
         Long parentId = req.parentId();
@@ -78,6 +81,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public Page<CommentResponse> listRoot(String targetType, long targetId, Pageable pageable) {
+        log.debug("List root comments targetType={}, targetId={}", targetType, targetId);
         return commentRepository
                 .findByTargetTypeAndTargetIdAndParentIdIsNullOrderByCreatedAtDesc(normalizeTargetType(targetType), targetId, pageable)
                 .map(commentResponseMapper::toDtoPublic);
@@ -85,6 +89,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public Page<CommentResponse> listReplies(long parentId, Pageable pageable) {
+        log.debug("List replies parentId={}", parentId);
         return commentRepository
                 .findByParentIdOrderByCreatedAtAsc(parentId, pageable)
                 .map(commentResponseMapper::toDtoPublic);
@@ -92,6 +97,7 @@ public class CommentService {
 
     @Transactional
     public CommentResponse update(long userId, long commentId, UpdateCommentRequest req) {
+        log.debug("Update comment userId={}, commentId={}", userId, commentId);
         Comment c = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment not found"));
 
@@ -108,6 +114,7 @@ public class CommentService {
 
     @Transactional
     public void delete(long userId, long commentId) {
+        log.debug("Delete comment userId={}, commentId={}", userId, commentId);
         Comment c = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment not found"));
 

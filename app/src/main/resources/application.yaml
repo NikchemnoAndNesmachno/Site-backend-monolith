@@ -72,9 +72,21 @@ spring:
 # Logging
 logging:
   level:
-    org.springframework.security: DEBUG
+#    org.springframework.security: DEBUG
     org.eclipse.angus.mail: DEBUG
     org.springframework.mail: DEBUG
+    ua.nin: DEBUG
+    root: INFO
+
+    # Security chain, matchers, decisions, auth failures
+    org.springframework.security: TRACE
+
+    # MVC dispatching, handler mapping, exception resolvers
+    org.springframework.web: TRACE
+    org.springframework.web.servlet: TRACE
+
+    # Filter registration/order at startup
+    web: DEBUG
 
 app:
   mail:

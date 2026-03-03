@@ -2,7 +2,6 @@ package ua.nin.identity.profile.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import ua.nin.identity.auth.model.User;
 
 import java.time.Instant;
 

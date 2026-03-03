@@ -1,6 +1,7 @@
 package ua.nin.reactions.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.nin.reactions.dto.ReactionActionResponse;
@@ -29,6 +30,7 @@ import static ua.nin.common.util.StringHelperUtils.normalizeTargetType;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReactionService {
 
     private final ReactionRepository reactionRepository;
@@ -37,11 +39,13 @@ public class ReactionService {
 
     @Transactional
     public ReactionActionResponse put(long userId, PutReactionRequest req) {
+        log.debug("Put reaction userId={}, targetType={}, targetId={}", userId, req.targetType(), req.targetId());
         String targetType = normalizeTargetType(req.targetType());
         long targetId = req.targetId();
         String newCode = normalizeReactionCode(req.reactionCode());
 
         if (!reactionTypeRepository.existsById(newCode)) {
+            log.debug("Reaction code not found for targetType={} reactionCode={}", targetType, newCode);
             throw new UnknownReactionTypeException("Unknown reaction type: " + newCode);
         }
 
@@ -52,25 +56,30 @@ public class ReactionService {
         String myReactionAfter;
 
         if (r == null) {
+            log.debug("Creation reaction for targetType={} reactionCode={}", targetType, newCode);
             createNew(userId, targetType, targetId, newCode);
             myReactionAfter = newCode;
 
         } else if (r.isActive()) {
+            log.debug("Active reaction found for targetType={} reactionCode={}", targetType, newCode);
             String oldCode = r.getReactionCode();
 
             if (oldCode.equals(newCode)) {
                 // toggle off
+                log.debug("Toggle off existing reaction targetType={} reactionCode={}", targetType, newCode);
                 toggleOff(r, now, targetType, targetId, oldCode);
                 myReactionAfter = null;
 
             } else {
                 // change reaction
+                log.debug("Changing existing reaction targetType={} reactionCode={}", targetType, newCode);
                 changeReaction(r, newCode, targetType, targetId, oldCode);
                 myReactionAfter = newCode;
             }
 
         } else {
             // was revoked -> activate (and maybe change type)
+            log.debug("Activating revoked reaction for targetType={} reactionCode={}", targetType, newCode);
             activateRevoked(r, newCode, targetType, targetId);
             myReactionAfter = newCode;
         }
@@ -83,6 +92,7 @@ public class ReactionService {
 
     @Transactional(readOnly = true)
     public Map<String, Long> counts(String targetTypeRaw, long targetId) {
+        log.debug("Reaction counts targetType={}, targetId={}", targetTypeRaw, targetId);
         String targetType = normalizeTargetType(targetTypeRaw);
         return reactionCountRepository.findByTarget(targetType, targetId).stream()
                 .collect(Collectors.toMap(rc -> rc.getId().getReactionCode(), ReactionCount::getCount));
@@ -90,6 +100,7 @@ public class ReactionService {
 
     @Transactional(readOnly = true)
     public String myReaction(long userId, String targetTypeRaw, long targetId) {
+        log.debug("My reaction userId={}, targetType={}, targetId={}", userId, targetTypeRaw, targetId);
         String targetType = normalizeTargetType(targetTypeRaw);
         return reactionRepository.findAny(userId, targetType, targetId)
                 .filter(Reaction::isActive)

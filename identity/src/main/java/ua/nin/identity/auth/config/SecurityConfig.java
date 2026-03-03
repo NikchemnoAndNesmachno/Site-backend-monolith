@@ -1,13 +1,12 @@
 package ua.nin.identity.auth.config;
 
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,6 +26,8 @@ import ua.nin.identity.auth.service.HttpCookieService;
 import ua.nin.identity.auth.service.OAuth2SuccessHandler;
 import ua.nin.identity.auth.util.TimeTokenUtils;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;
+import static jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED;
 import static ua.nin.common.constant.StringEndpoints.*;
 import static ua.nin.common.constant.AppConstant.ADMIN;
 import static ua.nin.common.constant.AppConstant.USER;
@@ -80,7 +81,8 @@ public class SecurityConfig {
                 p.matcher(SWAGGER_UI),
                 p.matcher(SWAGGER_UI_HTML),
 
-                p.matcher(HttpMethod.OPTIONS, "/**")
+                p.matcher(HttpMethod.OPTIONS, "/**"),
+                p.matcher("/error")
         );
     }
 
@@ -115,7 +117,11 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(exception -> exception.authenticationEntryPoint((req, resp, exc) -> resp
+                                .sendError(SC_UNAUTHORIZED, "Authorize first."))
+                        .accessDeniedHandler((req, resp, exc) -> resp.sendError(SC_FORBIDDEN, "You don't have authorities.")))
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.ERROR, DispatcherType.FORWARD).permitAll()
                         // --- Protected endpoints ---
                         .requestMatchers(HttpMethod.GET, API_V1_AUTH_ME).hasAnyRole(USER, ADMIN)
                         .requestMatchers(HttpMethod.POST, API_V1_AUTH_LOGOUT_ALL).hasAnyRole(USER, ADMIN)
@@ -153,10 +159,10 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+//        return authenticationConfiguration.getAuthenticationManager();
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

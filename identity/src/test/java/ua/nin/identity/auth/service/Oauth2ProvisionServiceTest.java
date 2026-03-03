@@ -5,7 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ua.nin.identity.auth.dto.OAuth2UserDto;
+import ua.nin.identity.auth.exception.exceptions.FailedUniqueUsernameCreationException;
 import ua.nin.identity.auth.exception.exceptions.NotFoundException;
+import ua.nin.identity.auth.exception.exceptions.UserNotFoundException;
 import ua.nin.identity.auth.model.OAuth2Identity;
 import ua.nin.identity.auth.model.Provider;
 import ua.nin.identity.auth.model.Role;
@@ -111,7 +113,7 @@ class Oauth2ProvisionServiceTest {
         when(userRepository.findById(10L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.provision(dto))
-                .isInstanceOf(NotFoundException.class)
+                .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("User not found: 10");
 
         verify(identityRepository, never()).save(any(OAuth2Identity.class));
@@ -248,7 +250,7 @@ class Oauth2ProvisionServiceTest {
         when(profileRepository.existsByUsername(anyString())).thenReturn(true);
 
         assertThatThrownBy(() -> service.provision(dto))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(FailedUniqueUsernameCreationException.class)
                 .hasMessageContaining("Failed to allocate unique username");
 
         verify(profileRepository, never()).saveAndFlush(any(Profile.class));
