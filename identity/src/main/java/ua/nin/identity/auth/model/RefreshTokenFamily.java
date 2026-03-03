@@ -1,12 +1,12 @@
 package ua.nin.identity.auth.model;
 
-import io.hypersistence.utils.hibernate.type.basic.PostgreSQLInetType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Type;
 
 import java.net.InetAddress;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -49,15 +49,13 @@ public class RefreshTokenFamily {
     /**
      * Postgres inet
      */
-//    @Type(PostgreSQLInetType.class)
-//    @Column(name="ip", columnDefinition="inet")
-//    private InetAddress ip;
     @Column(name = "ip", columnDefinition = "inet")
     private InetAddress ip;
 
-//    @OneToMany(mappedBy = "family", fetch = FetchType.LAZY)
-//    @Builder.Default
-//    private List<RefreshToken> tokens = new ArrayList<>();
+    @OneToMany(mappedBy = "family", fetch = FetchType.LAZY, orphanRemoval = true)
+    @Builder.Default
+    @ToString.Exclude
+    private List<RefreshToken> tokens = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

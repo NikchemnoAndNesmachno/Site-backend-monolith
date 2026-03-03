@@ -30,7 +30,7 @@ public class OAuth2Identity {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
-    @Column(name = "subject", nullable = false, length = 255)
+    @Column(name = "subject", nullable = false)
     private String subject;
 
     @Column(name = "email", length = 64)

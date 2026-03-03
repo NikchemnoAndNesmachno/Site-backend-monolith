@@ -60,7 +60,7 @@ public class RefreshTokenService {
 
         RefreshToken token = RefreshToken.builder()
                 .user(user)
-                .familyId(family.getId())
+                .family(family)
                 .tokenHash(hash)
                 .issuedAt(now)
                 .expiresAt(now.plus(refreshTtlDays, ChronoUnit.DAYS))
@@ -90,7 +90,7 @@ public class RefreshTokenService {
                 .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token not found"));
 
         // 1) family must be active
-        RefreshTokenFamily family = familyRepository.findById(current.getFamilyId())
+        RefreshTokenFamily family = familyRepository.findById(current.getFamily().getId())
                 .orElseThrow(() -> new InvalidRefreshTokenException("Refresh family not found"));
 
         if (family.isRevoked()) {
@@ -117,7 +117,7 @@ public class RefreshTokenService {
 
         RefreshToken next = RefreshToken.builder()
                 .user(current.getUser())
-                .familyId(family.getId())
+                .family(family)
                 .tokenHash(newHash)
                 .issuedAt(now)
                 .expiresAt(now.plus(refreshTtlDays, ChronoUnit.DAYS))
@@ -150,7 +150,7 @@ public class RefreshTokenService {
         String hash = timeTokenUtils.hash(rawRefreshToken);
 
         refreshTokenRepository.findByTokenHash(hash)
-                .ifPresent(token -> revokeFamilyInternal(token.getFamilyId(), now));
+                .ifPresent(token -> revokeFamilyInternal(token.getFamily().getId(), now));
     }
 
     /**

@@ -53,16 +53,6 @@
                 constraintName="fk_refresh_tokens_user"
                 onDelete="CASCADE"/>
 
-<!--        <addForeignKeyConstraint-->
-<!--                baseTableSchemaName="authentication"-->
-<!--                baseTableName="refresh_tokens"-->
-<!--                baseColumnNames="family_id"-->
-<!--                referencedTableSchemaName="authentication"-->
-<!--                referencedTableName="refresh_token_families"-->
-<!--                referencedColumnNames="id"-->
-<!--                constraintName="fk_refresh_tokens_family"-->
-<!--                onDelete="CASCADE"/>-->
-
         <addForeignKeyConstraint
                 baseTableSchemaName="authentication"
                 baseTableName="refresh_tokens"

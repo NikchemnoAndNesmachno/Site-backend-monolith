@@ -33,7 +33,7 @@ public class Video {
     @Column(name = "owner_user_id")
     private Long ownerUserId;
 
-    @Column(name = "title", nullable = false, length = 255)
+    @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "description", columnDefinition = "text")

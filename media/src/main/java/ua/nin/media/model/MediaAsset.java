@@ -33,7 +33,7 @@ public class MediaAsset {
     @Column(name = "content_type", nullable = false, length = 128)
     private String contentType;
 
-    @Column(name = "original_filename", length = 255)
+    @Column(name = "original_filename")
     private String originalFilename;
 
     /**

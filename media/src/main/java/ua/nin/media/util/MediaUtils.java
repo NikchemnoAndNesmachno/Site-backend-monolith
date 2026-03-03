@@ -1,5 +1,6 @@
 package ua.nin.media.util;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -9,7 +10,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Component
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MediaUtils {
 
     public static MediaKind detectKind(String contentType) {
