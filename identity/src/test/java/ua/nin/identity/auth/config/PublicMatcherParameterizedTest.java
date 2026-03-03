@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import ua.nin.identity.auth.service.HttpCookieService;
-import ua.nin.identity.auth.service.OAuth2SuccessHandler;
+import ua.nin.identity.auth.oauth2.handler.OAuth2SuccessHandler;
 import ua.nin.identity.auth.util.TimeTokenUtils;
 
 import java.util.stream.Stream;

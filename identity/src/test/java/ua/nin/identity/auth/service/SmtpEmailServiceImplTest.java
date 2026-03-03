@@ -10,7 +10,9 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailSendException;
 import org.springframework.test.util.ReflectionTestUtils;
+import ua.nin.identity.auth.exception.exceptions.EmailSenderException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -64,23 +66,70 @@ class SmtpEmailServiceImplTest {
         assertTrue(body.contains("<a href="), "Body must contain HTML anchor tag");
     }
 
-//    @Test
-//    void sendEmailVerification_whenMessagingException_thenThrowsIllegalStateException() throws  Exception {
-//        MimeMessage badMessage = mock(MimeMessage.class);
-//        when(mailSender.createMimeMessage()).thenReturn(badMessage);
-//
-//        // Вариант 1: грохнуть именно setFrom(String)
-//        doThrow(new MessagingException("boom"))
-//                .when(badMessage).setFrom(anyString());
-//
-//        IllegalStateException ex = assertThrows(
-//                IllegalStateException.class,
-//                () -> service.sendEmailVerification("test@nin.ua", "t")
-//        );
-//
-//        assertTrue(ex.getMessage().contains("Failed to send verification email"));
-//        verify(mailSender, never()).send(any(MimeMessage.class));
-//    }
+    @Test
+    void sendPasswordReset_buildsAndSendsHtmlEmail_withProperLinkAndHeaders() throws Exception {
+        when(mailSender.createMimeMessage()).thenReturn(new MimeMessage((Session) null));
+        String to = "user@example.com";
+        String token = "raw-token-123";
+
+        service.sendForgotPassword(to, token);
+
+        verify(mailSender).send(messageCaptor.capture());
+        MimeMessage msg = messageCaptor.getValue();
+
+        assertNotNull(msg);
+
+        // headers
+        assertEquals("Password reset", msg.getSubject());
+        assertEquals("test@nin.ua", msg.getFrom()[0].toString());
+        assertEquals(to, msg.getAllRecipients()[0].toString());
+
+        // content
+        Object content = msg.getContent();
+        assertNotNull(content);
+
+        // MimeMessageHelper робить multipart/related, тому тут часто не String
+        String body = MimeMessageTestUtil.extractText(msg);
+        assertTrue(body.contains("Password reset"));
+
+        String expectedLink = "https://test.nin.ua/api/v1/auth/password/reset?token=" + token;
+        assertTrue(body.contains(expectedLink), "Body must contain verification link with token");
+        assertTrue(body.contains("<a href="), "Body must contain HTML anchor tag");
+    }
+
+    @Test
+    void sendEmailVerification_whenMailSenderFails_thenThrowsEmailSenderException() {
+        MimeMessage msg = mock(MimeMessage.class);
+        when(mailSender.createMimeMessage()).thenReturn(msg);
+
+        doThrow(new MailSendException("boom"))
+                .when(mailSender).send(msg);
+
+        EmailSenderException ex = assertThrows(
+                EmailSenderException.class,
+                () -> service.sendEmailVerification("test@nin.ua", "t")
+        );
+
+        assertTrue(ex.getMessage().contains("Failed to send verification email"));
+        verify(mailSender).send(msg);
+    }
+
+    @Test
+    void sendPasswordReset_whenMailSenderFails_thenThrowsEmailSenderException() {
+        MimeMessage msg = mock(MimeMessage.class);
+        when(mailSender.createMimeMessage()).thenReturn(msg);
+
+        doThrow(new MailSendException("boom"))
+                .when(mailSender).send(msg);
+
+        EmailSenderException ex = assertThrows(
+                EmailSenderException.class,
+                () -> service.sendForgotPassword("test@nin.ua", "t")
+        );
+
+        assertTrue(ex.getMessage().contains("Failed to send password reset email"));
+        verify(mailSender).send(msg);
+    }
 
     /**
      * Утіліта, щоб дістати текст/HTML із MimeMessage, навіть якщо там multipart.

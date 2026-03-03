@@ -1,4 +1,4 @@
-package ua.nin.identity.auth.service;
+package ua.nin.identity.auth.oauth2.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +22,9 @@ import ua.nin.identity.auth.dto.IssueNewResult;
 import ua.nin.identity.auth.dto.OAuth2UserDto;
 import ua.nin.identity.auth.model.Role;
 import ua.nin.identity.auth.model.User;
+import ua.nin.identity.auth.service.AccessTokenService;
+import ua.nin.identity.auth.service.HttpCookieService;
+import ua.nin.identity.auth.service.RefreshTokenService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
