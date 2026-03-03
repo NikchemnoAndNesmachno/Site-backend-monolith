@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.nin.identity.auth.exception.exceptions.InvalidTokenException;
+import ua.nin.identity.auth.exception.exceptions.MissingTokenException;
+import ua.nin.identity.auth.exception.exceptions.TokenAlreadyUsedException;
+import ua.nin.identity.auth.exception.exceptions.TokenExpiredException;
 import ua.nin.identity.auth.model.EmailVerificationToken;
 import ua.nin.identity.auth.model.Status;
 import ua.nin.identity.auth.model.User;
@@ -40,21 +43,20 @@ public class EmailVerificationService {
     @Transactional
     public void verify(String rawToken) {
         if (rawToken == null || rawToken.isBlank()) {
-            throw new InvalidTokenException("Missing verification token");
+            throw new MissingTokenException("Missing verification token");
         }
 
         String hash = timeTokenUtils.hash(rawToken);
-
         EmailVerificationToken token = tokenRepository.findByTokenHash(hash)
                 .orElseThrow(() -> new InvalidTokenException("Invalid verification token"));
 
         Instant now = Instant.now();
 
         if (token.isUsed()) {
-            throw new InvalidTokenException("Verification token already used");
+            throw new TokenAlreadyUsedException("Verification token already used");
         }
         if (token.isExpired(now)) {
-            throw new InvalidTokenException("Verification token expired");
+            throw new TokenExpiredException("Verification token expired");
         }
 
         User user = token.getUser();

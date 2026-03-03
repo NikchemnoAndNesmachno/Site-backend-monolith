@@ -17,8 +17,6 @@ import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.UserRepository;
 import ua.nin.common.util.StringHelperUtils;
-import ua.nin.identity.profile.model.Privacy;
-import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
 
 import static ua.nin.common.constant.ErrorMessage.*;
@@ -94,7 +92,7 @@ public class AuthService {
         }
 
         Credential cred = credentialRepository.findById(user.getId())
-                .orElseThrow(() -> new BadCredentialsException(INVALID_CREDENTIALS));
+                .orElseThrow(() -> new CredentialNotFoundException("Credential missing"));
 
         if (!passwordEncoder.matches(req.password(), cred.getPasswordHash())) {
             cred.incrementFailedLoginAttempts();

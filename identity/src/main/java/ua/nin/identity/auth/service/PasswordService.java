@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.nin.identity.auth.exception.exceptions.BadCredentialsException;
-import ua.nin.identity.auth.exception.exceptions.InvalidTokenException;
+import ua.nin.identity.auth.exception.exceptions.*;
 import ua.nin.identity.auth.model.Credential;
 import ua.nin.identity.auth.model.PasswordResetToken;
 import ua.nin.identity.auth.model.Status;
@@ -86,7 +85,7 @@ public class PasswordService {
     @Transactional
     public void reset(String rawToken, String newPassword) {
         if (rawToken == null || rawToken.isBlank()) {
-            throw new InvalidTokenException("Missing reset token");
+            throw new MissingTokenException("Missing reset token");
         }
 
         String hash = timeTokenUtils.hash(rawToken);
@@ -94,17 +93,18 @@ public class PasswordService {
                 .orElseThrow(() -> new InvalidTokenException("Invalid reset token"));
 
         Instant now = Instant.now();
+
         if (token.isUsed()) {
-            throw new InvalidTokenException("Reset token already used");
+            throw new TokenAlreadyUsedException("Reset token already used");
         }
         if (token.isExpired(now)) {
-            throw new InvalidTokenException("Reset token expired");
+            throw new TokenExpiredException("Reset token expired");
         }
 
         User user = token.getUser();
 
         Credential cred = credentialRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalStateException("Credential missing"));
+                .orElseThrow(() -> new CredentialNotFoundException("Credential missing"));
 
         cred.setPasswordHash(passwordEncoder.encode(newPassword));
         cred.setPasswordUpdatedAt(now);
@@ -125,7 +125,7 @@ public class PasswordService {
     @Transactional
     public void change(long userId, String currentPassword, String newPassword) {
         Credential cred = credentialRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("Credential missing"));
+                .orElseThrow(() -> new CredentialNotFoundException("Credential missing"));
 
         if (!passwordEncoder.matches(currentPassword, cred.getPasswordHash())) {
             throw new BadCredentialsException("Current password invalid");

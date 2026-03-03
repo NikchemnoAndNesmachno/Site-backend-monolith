@@ -5,7 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ua.nin.identity.auth.dto.OAuth2UserDto;
-import ua.nin.identity.auth.exception.exceptions.NotFoundException;
+import ua.nin.identity.auth.exception.exceptions.FailedUniqueUsernameCreationException;
+import ua.nin.identity.auth.exception.exceptions.UserNotFoundException;
 import ua.nin.identity.auth.model.OAuth2Identity;
 import ua.nin.identity.auth.model.Role;
 import ua.nin.identity.auth.model.Status;
@@ -37,7 +38,7 @@ public class Oauth2ProvisionService {
         if (existingIdentity.isPresent()) {
             Long userId = existingIdentity.get().getUserId();
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new NotFoundException("User not found: " + userId));
+                    .orElseThrow(() -> new UserNotFoundException("User not found: " + userId));
             touchIdentity(existingIdentity.get(), dto, now);
             return user;
         }
@@ -138,6 +139,6 @@ public class Oauth2ProvisionService {
         candidate = candidate.length() > 64 ? candidate.substring(0, 64) : candidate;
         if (!profileRepository.existsByUsername(candidate)) return candidate;
 
-        throw new IllegalStateException("Failed to allocate unique username.");
+        throw new FailedUniqueUsernameCreationException("Failed to allocate unique username.");
     }
 }

@@ -2,6 +2,7 @@ package ua.nin.identity.auth.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ua.nin.identity.auth.dto.ResendVerifyRequest;
@@ -10,18 +11,21 @@ import ua.nin.identity.auth.service.EmailVerificationService;
 @RestController
 @RequestMapping("/api/v1/auth/email")
 @RequiredArgsConstructor
+@Slf4j
 public class EmailVerificationController {
 
     private final EmailVerificationService emailVerificationService;
 
     @GetMapping("/verify")
     public ResponseEntity<Void> verify(@Valid @RequestParam(name = "token") String verifyEmailToken) {
+        log.debug("Email verification requested");
         emailVerificationService.verify(verifyEmailToken);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/resend")
     public ResponseEntity<Void> resend(@Valid @RequestBody ResendVerifyRequest req) {
+        log.debug("Email resend requested");
         // важливо: не палимо чи існує email
         emailVerificationService.resend(req.email());
         return ResponseEntity.noContent().build();

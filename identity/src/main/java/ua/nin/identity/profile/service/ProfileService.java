@@ -1,6 +1,7 @@
 package ua.nin.identity.profile.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.nin.contract.profile.ProfileCreation;
@@ -19,6 +20,7 @@ import static ua.nin.common.util.StringHelperUtils.normalizeUsername;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProfileService implements ProfileCreation {
 
     private final ProfileRepository profileRepository;

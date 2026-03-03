@@ -3,6 +3,7 @@ package ua.nin.identity.auth.util;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Component;
+import ua.nin.identity.auth.exception.exceptions.TokenHashingException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -48,7 +49,7 @@ public class TimeTokenUtils {
             byte[] digest = md.digest(input);
             return new String(Hex.encode(digest));
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot hash token", e);
+            throw new TokenHashingException("Cannot hash token", e);
         }
     }
 
@@ -59,7 +60,7 @@ public class TimeTokenUtils {
             byte[] out = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(out);
         } catch (Exception e) {
-            throw new IllegalStateException("Cannot hash token", e);
+            throw new TokenHashingException("Cannot hash token", e);
         }
     }
 }

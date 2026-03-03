@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import ua.nin.identity.auth.exception.exceptions.InvalidJwtSecretException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -39,7 +40,7 @@ public class JwtConfig {
                 : jwtSecret.getBytes(StandardCharsets.UTF_8);
 
         if (secretBytes.length < 32) {
-            throw new IllegalArgumentException(
+            throw new InvalidJwtSecretException(
                     "JWT secret is too short for HS256 (min 32 bytes)"
             );
         }

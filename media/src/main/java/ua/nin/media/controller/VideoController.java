@@ -2,6 +2,7 @@ package ua.nin.media.controller;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import ua.nin.media.service.VideoService;
 @RestController
 @RequestMapping("/api/v1/video")
 @RequiredArgsConstructor
+@Slf4j
 public class VideoController {
 
     private final VideoService videoService;
@@ -29,12 +31,14 @@ public class VideoController {
             Authentication authentication
     ) {
         long userId = Long.parseLong(authentication.getName());
+        log.debug("Authenticated userId={} requested video with preview uploading", userId);
         return ResponseEntity.ok(videoService.uploadVideoWithPreview(title, description, visibility, userId, video, preview));
     }
 
     @DeleteMapping("/{videoId}")
     public ResponseEntity<Void> delete(@PathVariable long videoId, Authentication authentication) {
         long userId = Long.parseLong(authentication.getName());
+        log.debug("Authenticated userId={} requested video deletion by videoId={}", userId, videoId);
         videoService.deleteVideoWithPreview(userId, videoId);
         return ResponseEntity.noContent().build();
     }
