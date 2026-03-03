@@ -2,14 +2,13 @@ package ua.nin.media.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import ua.nin.media.dto.MediaMetaResponse;
 import ua.nin.media.dto.MediaUploadResponse;
 import ua.nin.media.exception.exceptions.FileMovingException;
+import ua.nin.media.exception.exceptions.FileNotFoundException;
 import ua.nin.media.exception.exceptions.FileStoringException;
 import ua.nin.media.exception.exceptions.MediaNotFoundException;
 import ua.nin.media.mapper.MediaMetaResponseMapper;
@@ -85,8 +84,8 @@ public class MediaService {
 
         try {
             storage.delete(asset.getStorageKey());
-        } catch (Exception ignored) {
-            // best-effort delete; DB state is the source of truth
+        } catch (Exception ex) {
+            log.error("Failed to delete asset: {}", ex.getMessage(), ex);
         }
     }
 
@@ -96,8 +95,9 @@ public class MediaService {
                 .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND));
         try {
             return storage.open(asset.getStorageKey());
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, FILE_NOT_FOUND);
+        } catch (Exception ex) {
+            log.error("Failed to open asset: {}", ex.getMessage(), ex);
+            throw new FileNotFoundException(FILE_NOT_FOUND);
         }
     }
 
@@ -109,13 +109,17 @@ public class MediaService {
 
     @Transactional
     public MediaAsset storeSingle(MultipartFile file, MediaKind forcedKind) {
+        log.debug("Storing media file {}", file.getOriginalFilename());
         multipartMediaValidator.validate(file);
+        log.debug("Validated media file {}", file.getOriginalFilename());
 
         String contentType = normalizeContentType(file.getContentType());
         MediaKind kind = forcedKind != null ? forcedKind : detectKind(contentType);
+        log.debug("Detected media kind {}", kind);
 
         String originalFilename = sanitizeOriginalFilename(file.getOriginalFilename());
         String extension = pickExtension(originalFilename, contentType);
+        log.debug("Sanitized original filename and picked media extension: {}", originalFilename);
 
         String tmpStorageKey = buildTmpStorageKey(extension);
 
@@ -129,15 +133,20 @@ public class MediaService {
                 storage.save(tmpStorageKey, in);
             }
             sha256 = HexFormat.of().formatHex(md.digest());
-        } catch (Exception e) {
+        } catch (Exception ex) {
+            log.error("Failed to store file: {}", ex.getMessage(), ex);
             throw new FileStoringException(CANNOT_STORE_MEDIA);
         }
+        log.debug("Temporary media file stored: {}", originalFilename);
 
         var existing = assetRepository.findBySha256AndSizeBytesAndDeletedAtIsNull(sha256, sizeBytes);
         if (existing.isPresent()) {
             try {
                 storage.delete(tmpStorageKey);
-            }  catch (Exception ignored) {}
+            }  catch (Exception ex) {
+                log.error("Failed to delete temporary asset: {}", ex.getMessage(), ex);
+            }
+            log.debug("Found existing asset: {}", existing.get().getOriginalFilename());
             return existing.get();
         }
 
@@ -145,9 +154,11 @@ public class MediaService {
 
         try {
             storage.move(tmpStorageKey, storageKey);
-        } catch (IOException ignored) {
+        } catch (IOException ex) {
+            log.error("Failed to move from temp storage: storage key {} : {}", storageKey, ex.getMessage(), ex);
             throw new FileMovingException(CANNOT_FINALIZE_MEDIA);
         }
+        log.debug("Moved temporary media file stored to: storageKey {}", storageKey);
 
         MediaAsset asset = MediaAsset.builder()
                 .kind(kind)
@@ -161,4 +172,3 @@ public class MediaService {
         return assetRepository.save(asset);
     }
 }
-

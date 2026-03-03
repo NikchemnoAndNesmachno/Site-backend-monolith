@@ -45,6 +45,7 @@ public class ReactionService {
         String newCode = normalizeReactionCode(req.reactionCode());
 
         if (!reactionTypeRepository.existsById(newCode)) {
+            log.debug("Reaction code not found for targetType={} reactionCode={}", targetType, newCode);
             throw new UnknownReactionTypeException("Unknown reaction type: " + newCode);
         }
 
@@ -55,25 +56,30 @@ public class ReactionService {
         String myReactionAfter;
 
         if (r == null) {
+            log.debug("Creation reaction for targetType={} reactionCode={}", targetType, newCode);
             createNew(userId, targetType, targetId, newCode);
             myReactionAfter = newCode;
 
         } else if (r.isActive()) {
+            log.debug("Active reaction found for targetType={} reactionCode={}", targetType, newCode);
             String oldCode = r.getReactionCode();
 
             if (oldCode.equals(newCode)) {
                 // toggle off
+                log.debug("Toggle off existing reaction targetType={} reactionCode={}", targetType, newCode);
                 toggleOff(r, now, targetType, targetId, oldCode);
                 myReactionAfter = null;
 
             } else {
                 // change reaction
+                log.debug("Changing existing reaction targetType={} reactionCode={}", targetType, newCode);
                 changeReaction(r, newCode, targetType, targetId, oldCode);
                 myReactionAfter = newCode;
             }
 
         } else {
             // was revoked -> activate (and maybe change type)
+            log.debug("Activating revoked reaction for targetType={} reactionCode={}", targetType, newCode);
             activateRevoked(r, newCode, targetType, targetId);
             myReactionAfter = newCode;
         }

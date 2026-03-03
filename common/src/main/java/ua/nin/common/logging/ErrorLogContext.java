@@ -1,6 +1,5 @@
 package ua.nin.common.logging;
 
-import org.slf4j.MDC;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
@@ -17,7 +16,7 @@ public record ErrorLogContext(
         Instant timestamp = ((Date) attrs.get("timestamp")).toInstant();
 
         return new ErrorLogContext(
-                MDC.get("requestId"),
+                (String) attrs.get("requestId"),
                 (String) attrs.get("path"),
                 timestamp,
                 ex.getClass().getSimpleName(),

@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.WebRequest;
 import ua.nin.common.exception.response.ExceptionResponse;
+import ua.nin.views.exception.exceptions.ViewerKeyHashException;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -41,13 +42,20 @@ class ViewExceptionHandlerTest {
         objectMap.put("message", "test");
         objectMap.put("timestamp", new Date());
         objectMap.put("trace", "Internal Server Error");
+        when(errorAttributes.getErrorAttributes(eq(webRequest),
+                any(ErrorAttributeOptions.class))).thenReturn(objectMap);
+    }
+
+    @Test
+    void handleViewerKeyHashException() {
+        ViewerKeyHashException exception = new ViewerKeyHashException("test", new RuntimeException());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                handler.handleViewerKeyHashException(exception, webRequest).getStatusCode());
     }
 
     @Test
     void testHandleInternalServerErrorException() {
         RuntimeException exception = new RuntimeException("test");
-        when(errorAttributes.getErrorAttributes(eq(webRequest),
-                any(ErrorAttributeOptions.class))).thenReturn(objectMap);
         assertEquals(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ExceptionResponse("Internal server error")),
                 handler.handleGeneric(exception, webRequest));
     }

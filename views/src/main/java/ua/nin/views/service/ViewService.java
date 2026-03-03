@@ -50,6 +50,7 @@ public class ViewService {
         Instant now = Instant.now();
 
         String tType = normalizeTargetType(targetType);
+        log.debug("Normalized view targetType={}", tType);
         Instant bucketStart = bucketStartDayUtc(now);
 
         String viewerKey = buildViewerKey(userId, userAgent, ip);
@@ -57,6 +58,7 @@ public class ViewService {
 
         int inserted = uniqueRepo.insertUniqueIfAbsent(tType, targetId, viewerHash, bucketStart, now);
         long uniqueInc = inserted == 1 ? 1 : 0;
+        log.debug("Unique view inc={} ", uniqueInc);
 
         countRepo.upsertIncrement(tType, targetId, 1, uniqueInc);
     }
@@ -91,6 +93,7 @@ public class ViewService {
             for (byte b : digest) sb.append(String.format("%02x", b));
             return sb.toString();
         } catch (Exception e) {
+            log.error("Hash viewer key error {}", e.getMessage(), e);
             throw new ViewerKeyHashException("Cannot hash viewer key", e);
         }
     }

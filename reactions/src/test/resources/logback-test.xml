@@ -1,0 +1,15 @@
+<configuration>
+
+    <appender name="NIN_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd'T'HH:mm:ss.SSS, UTC} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([${appName:-}]){green} %clr([%thread]){faint} %clr([reqId=%X{requestId}]){cyan} %clr(%logger{40}){blue} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <logger name="ua.nin" level="DEBUG" additivity="false">
+        <appender-ref ref="NIN_CONSOLE"/>
+    </logger>
+
+</configuration>

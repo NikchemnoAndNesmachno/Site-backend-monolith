@@ -1,8 +1,10 @@
 package ua.nin.media.storage;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ua.nin.media.config.MediaProperties;
+import ua.nin.media.exception.exceptions.InvalidStorageKeyException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +13,7 @@ import java.nio.file.*;
 import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class LocalFileSystemMediaStorage implements MediaStorage {
@@ -58,7 +61,8 @@ public class LocalFileSystemMediaStorage implements MediaStorage {
     private static Path safeResolve(Path root, String storageKey) {
         Path p = root.resolve(storageKey).normalize();
         if (!p.startsWith(root)) {
-            throw new IllegalArgumentException("Invalid storageKey (path traversal): " + storageKey);
+            log.error("Invalid path: {}", p);
+            throw new InvalidStorageKeyException("Invalid storageKey (path traversal): " + storageKey);
         }
         return p;
     }
