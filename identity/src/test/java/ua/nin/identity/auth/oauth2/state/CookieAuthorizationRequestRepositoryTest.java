@@ -61,11 +61,11 @@ class CookieAuthorizationRequestRepositoryTest {
         repo.saveAuthorizationRequest(authReq, req, resp);
 
         verify(httpCookieService).addCookie(
-                eq(resp),
-                eq(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME),
+                resp,
+                OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
                 cookieValueCaptor.capture(),
-                eq(OAUTH2_PATH),
-                eq(180L) // <-- ВАЖНО: long
+                OAUTH2_PATH,
+                180L // <-- ВАЖНО: long
         );
 
         String serialized = cookieValueCaptor.getValue();
@@ -73,11 +73,11 @@ class CookieAuthorizationRequestRepositoryTest {
         assertThat(serialized.split("\\.")).hasSize(2);
 
         verify(httpCookieService).addCookie(
-                eq(resp),
-                eq(REDIRECT_URI_COOKIE_NAME),
-                eq("https://front/app/after"),
-                eq(OAUTH2_PATH),
-                eq(180L) // <-- long
+                resp,
+                REDIRECT_URI_COOKIE_NAME,
+                "https://front/app/after",
+                OAUTH2_PATH,
+                180L // <-- long
         );
 
         verify(httpCookieService, never()).deleteCookie(any(), anyString(), anyString());
@@ -90,8 +90,8 @@ class CookieAuthorizationRequestRepositoryTest {
 
         repo.saveAuthorizationRequest(null, req, resp);
 
-        verify(httpCookieService).deleteCookie(eq(resp), eq(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME), eq(OAUTH2_PATH));
-        verify(httpCookieService).deleteCookie(eq(resp), eq(REDIRECT_URI_COOKIE_NAME), eq(OAUTH2_PATH));
+        verify(httpCookieService).deleteCookie(resp, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, OAUTH2_PATH);
+        verify(httpCookieService).deleteCookie(resp, REDIRECT_URI_COOKIE_NAME, OAUTH2_PATH);
         verify(httpCookieService, never()).addCookie(any(), anyString(), anyString(), anyString(), anyLong());
 
         // и вот тут hmacSha256 НЕ вызывается -> поэтому не надо его стабать в setUp()
@@ -107,7 +107,7 @@ class CookieAuthorizationRequestRepositoryTest {
         OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect("https://front/app/after");
         String serialized = repo.serialize(original);
 
-        when(httpCookieService.getCookie(eq(req), eq(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME)))
+        when(httpCookieService.getCookie(req, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME))
                 .thenReturn(Optional.of(new Cookie(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, serialized)));
 
         OAuth2AuthorizationRequest loaded = repo.loadAuthorizationRequest(req);
@@ -130,7 +130,7 @@ class CookieAuthorizationRequestRepositoryTest {
     void loadAuthorizationRequest_whenNoCookie_shouldReturnNull() {
         var req = new MockHttpServletRequest();
 
-        when(httpCookieService.getCookie(eq(req), eq(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME)))
+        when(httpCookieService.getCookie(req, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME))
                 .thenReturn(Optional.empty());
 
         assertThat(repo.loadAuthorizationRequest(req)).isNull();
@@ -147,7 +147,7 @@ class CookieAuthorizationRequestRepositoryTest {
         OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect("https://front/app/after");
         String serialized = repo.serialize(original);
 
-        when(httpCookieService.getCookie(eq(req), eq(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME)))
+        when(httpCookieService.getCookie(req, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME))
                 .thenReturn(Optional.of(new Cookie(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, serialized)));
 
         OAuth2AuthorizationRequest removed = repo.removeAuthorizationRequest(req, resp);
@@ -155,8 +155,8 @@ class CookieAuthorizationRequestRepositoryTest {
         assertThat(removed).isNotNull();
         assertThat(removed.getClientId()).isEqualTo(original.getClientId());
 
-        verify(httpCookieService).deleteCookie(eq(resp), eq(OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME), eq(OAUTH2_PATH));
-        verify(httpCookieService).deleteCookie(eq(resp), eq(REDIRECT_URI_COOKIE_NAME), eq(OAUTH2_PATH));
+        verify(httpCookieService).deleteCookie(resp, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, OAUTH2_PATH);
+        verify(httpCookieService).deleteCookie(resp, REDIRECT_URI_COOKIE_NAME, OAUTH2_PATH);
     }
 
     @Test

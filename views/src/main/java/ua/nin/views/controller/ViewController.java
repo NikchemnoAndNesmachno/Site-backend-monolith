@@ -29,7 +29,7 @@ public class ViewController {
         log.debug("Record view endpoint targetType={}, targetId={}", targetType, targetId);
         Long userId = null;
         if (auth != null && auth.isAuthenticated()) {
-            try { userId = Long.parseLong(auth.getName()); } catch (Exception ignored) {}
+            userId = Long.parseLong(auth.getName());
         }
 
         String ip = extractIp(xff, xRealIp);

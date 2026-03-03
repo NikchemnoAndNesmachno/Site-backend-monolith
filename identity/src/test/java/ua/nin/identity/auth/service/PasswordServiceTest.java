@@ -9,7 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 import ua.nin.identity.auth.exception.exceptions.BadCredentialsException;
-import ua.nin.identity.auth.exception.exceptions.InvalidTokenException;
 import ua.nin.identity.auth.exception.exceptions.MissingTokenException;
 import ua.nin.identity.auth.exception.exceptions.TokenExpiredException;
 import ua.nin.identity.auth.model.Credential;

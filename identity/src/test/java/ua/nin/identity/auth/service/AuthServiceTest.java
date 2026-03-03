@@ -17,10 +17,7 @@ import ua.nin.identity.auth.model.Status;
 import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.UserRepository;
-import ua.nin.identity.profile.model.Privacy;
-import ua.nin.identity.profile.model.Profile;
 import ua.nin.identity.profile.repository.ProfileRepository;
-import ua.nin.identity.profile.service.ProfileService;
 
 import java.util.List;
 import java.util.Optional;

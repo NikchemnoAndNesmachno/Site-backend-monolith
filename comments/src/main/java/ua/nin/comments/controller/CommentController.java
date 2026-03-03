@@ -32,7 +32,7 @@ public class CommentController {
     @GetMapping
     public ResponseEntity<Page<CommentResponse>> listRoot(@RequestParam @NotNull String targetType,
                                                           @RequestParam @NotNull @Positive Long targetId,
-                                                          @PageableDefault(page = 0, size = 20) Pageable pageable
+                                                          @PageableDefault(size = 20) Pageable pageable
     ) {
         log.debug("List root comments targetType={}, targetId={}", targetType, targetId);
         return ResponseEntity.ok(commentService.listRoot(targetType, targetId, pageable));
@@ -40,7 +40,7 @@ public class CommentController {
 
     @GetMapping("/{parentId}/replies")
     public ResponseEntity<Page<CommentResponse>> listReplies(@PathVariable long parentId,
-                                                             @PageableDefault(page = 0, size = 5) Pageable pageable) {
+                                                             @PageableDefault(size = 5) Pageable pageable) {
         log.debug("List replies parentId={}", parentId);
         return ResponseEntity.ok(commentService.listReplies(parentId, pageable));
     }
