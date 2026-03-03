@@ -56,7 +56,7 @@ class CookieAuthorizationRequestRepositoryTest {
         var req = new MockHttpServletRequest();
         var resp = new MockHttpServletResponse();
 
-        OAuth2AuthorizationRequest authReq = sampleAuthRequestWithRedirect("https://front/app/after");
+        OAuth2AuthorizationRequest authReq = sampleAuthRequestWithRedirect();
 
         repo.saveAuthorizationRequest(authReq, req, resp);
 
@@ -104,7 +104,7 @@ class CookieAuthorizationRequestRepositoryTest {
 
         var req = new MockHttpServletRequest();
 
-        OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect("https://front/app/after");
+        OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect();
         String serialized = repo.serialize(original);
 
         when(httpCookieService.getCookie(req, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME))
@@ -144,7 +144,7 @@ class CookieAuthorizationRequestRepositoryTest {
         var req = new MockHttpServletRequest();
         var resp = new MockHttpServletResponse();
 
-        OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect("https://front/app/after");
+        OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect();
         String serialized = repo.serialize(original);
 
         when(httpCookieService.getCookie(req, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME))
@@ -171,7 +171,7 @@ class CookieAuthorizationRequestRepositoryTest {
     void deserialize_whenTamperedData_shouldThrowCookieDeserializeException() {
         stubDeterministicHmac();
 
-        OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect("https://front/app/after");
+        OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect();
         String serialized = repo.serialize(original);
 
         String[] parts = serialized.split("\\.");
@@ -192,7 +192,7 @@ class CookieAuthorizationRequestRepositoryTest {
         when(timeTokenUtils.hmacSha256(anyString()))
                 .thenThrow(new RuntimeException("boom"));
 
-        OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect("https://front/app/after");
+        OAuth2AuthorizationRequest original = sampleAuthRequestWithRedirect();
 
         assertThatThrownBy(() -> repo.serialize(original))
                 .isInstanceOf(CookieSerializeException.class);
@@ -200,7 +200,7 @@ class CookieAuthorizationRequestRepositoryTest {
 
     // ---- helpers ----
 
-    private static OAuth2AuthorizationRequest sampleAuthRequestWithRedirect(String redirectCookieValue) {
+    private static OAuth2AuthorizationRequest sampleAuthRequestWithRedirect() {
         return OAuth2AuthorizationRequest.authorizationCode()
                 .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
                 .clientId("client-123")
@@ -209,7 +209,7 @@ class CookieAuthorizationRequestRepositoryTest {
                 .state("state-xyz")
                 .attributes(Map.of("k", "v"))
                 .additionalParameters(Map.of(
-                        REDIRECT_URI_COOKIE_NAME, redirectCookieValue,
+                        REDIRECT_URI_COOKIE_NAME, "https://front/app/after",
                         "access_type", "offline"
                 ))
                 .build();
