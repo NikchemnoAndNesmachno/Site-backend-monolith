@@ -51,6 +51,8 @@
         <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
         <jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
 
+        <org.apache.commons-lang3.version>3.18.0</org.apache.commons-lang3.version>
+
         <sonar.maven.plugin.version>5.5.0.6356</sonar.maven.plugin.version>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.java.binaries>target/classes</sonar.java.binaries>
@@ -58,7 +60,7 @@
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.organization>nikchemnoandnesmachno</sonar.organization>
         <sonar.projectKey>NikchemnoAndNesmachno_Site-backend-monolith</sonar.projectKey>
-<!--    app збирає jacoco-aggregate, маючи контекст усіх модулів (тому що він залежить від них)-->
+        <!--    app збирає jacoco-aggregate, маючи контекст усіх модулів (тому що він залежить від них)-->
         <sonar.coverage.jacoco.xmlReportPaths>
             **/target/site/jacoco-aggregate/jacoco.xml
         </sonar.coverage.jacoco.xmlReportPaths>
@@ -110,6 +112,13 @@
                 <groupId>io.hypersistence</groupId>
                 <artifactId>hypersistence-utils-hibernate-63</artifactId>
                 <version>${apache.hibernate.utils.types}</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${org.apache.commons-lang3.version}</version>
                 <scope>compile</scope>
             </dependency>
         </dependencies>
