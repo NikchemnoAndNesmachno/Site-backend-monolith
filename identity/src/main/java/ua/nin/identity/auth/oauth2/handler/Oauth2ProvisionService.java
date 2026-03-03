@@ -1,4 +1,4 @@
-package ua.nin.identity.auth.service;
+package ua.nin.identity.auth.oauth2.handler;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

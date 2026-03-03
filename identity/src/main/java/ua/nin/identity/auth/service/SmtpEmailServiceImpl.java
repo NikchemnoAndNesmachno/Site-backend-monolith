@@ -3,7 +3,9 @@ package ua.nin.identity.auth.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -13,6 +15,7 @@ import ua.nin.identity.auth.exception.exceptions.EmailSenderException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SmtpEmailServiceImpl implements EmailSenderService {
 
     private final JavaMailSender mailSender;
@@ -50,7 +53,8 @@ public class SmtpEmailServiceImpl implements EmailSenderService {
             helper.setSubject(subject);
             helper.setText(html, true);
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (MessagingException | MailException e) {
+            log.error("Failed to send email verification: {}", e.getMessage(), e);
             throw new EmailSenderException("Failed to send verification email", e);
         }
     }
@@ -82,7 +86,8 @@ public class SmtpEmailServiceImpl implements EmailSenderService {
             helper.setSubject(subject);
             helper.setText(html, true);
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (MessagingException | MailException e) {
+            log.error("Failed to send password reset email: {}", e.getMessage(), e);
             throw new EmailSenderException("Failed to send password reset email", e);
         }
     }
