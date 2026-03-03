@@ -6,8 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import ua.nin.media.dto.MediaMetaResponse;
+import ua.nin.media.exception.exceptions.FileNotFoundException;
 import ua.nin.media.exception.exceptions.MediaNotFoundException;
 import ua.nin.media.mapper.MediaMetaResponseMapper;
 import ua.nin.media.model.MediaAsset;
@@ -74,7 +74,7 @@ class MediaServiceTest {
         when(storage.open("key")).thenThrow(new RuntimeException("missing"));
 
         assertThatThrownBy(() -> mediaService.open(1L))
-                .isInstanceOf(ResponseStatusException.class)
+                .isInstanceOf(FileNotFoundException.class)
                 .hasMessageContaining("File not found");
     }
 

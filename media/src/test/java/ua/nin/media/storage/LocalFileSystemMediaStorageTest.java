@@ -3,6 +3,7 @@ package ua.nin.media.storage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import ua.nin.media.config.MediaProperties;
+import ua.nin.media.exception.exceptions.InvalidStorageKeyException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -43,6 +44,6 @@ class LocalFileSystemMediaStorageTest {
         properties.getStorage().getLocal().setRoot(tempDir.toString());
         LocalFileSystemMediaStorage storage = new LocalFileSystemMediaStorage(properties);
 
-        assertThrows(IllegalArgumentException.class, () -> storage.open("../secret.txt"));
+        assertThrows(InvalidStorageKeyException.class, () -> storage.open("../secret.txt"));
     }
 }
