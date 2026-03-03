@@ -23,7 +23,7 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import ua.nin.identity.auth.oauth2.state.CookieAuthorizationRequestRepository;
 import ua.nin.identity.auth.service.HttpCookieService;
-import ua.nin.identity.auth.service.OAuth2SuccessHandler;
+import ua.nin.identity.auth.oauth2.handler.OAuth2SuccessHandler;
 import ua.nin.identity.auth.util.TimeTokenUtils;
 
 import static jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN;

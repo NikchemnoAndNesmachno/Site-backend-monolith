@@ -17,8 +17,7 @@ import ua.nin.identity.profile.dto.UpdateProfileRequest;
 import ua.nin.identity.profile.model.Privacy;
 import ua.nin.identity.profile.service.ProfileService;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -57,6 +56,9 @@ class ProfileControllerTest {
                 .andExpect(jsonPath("$.username").value("user"))
                 .andExpect(jsonPath("$.displayName").value("User"))
                 .andExpect(jsonPath("$.bio").value("bio"));
+
+
+        verify(profileService).getMyProfile(1L);
     }
 
     @Test
@@ -76,6 +78,8 @@ class ProfileControllerTest {
                 .andExpect(jsonPath("$.username").value("user"))
                 .andExpect(jsonPath("$.displayName").value("User"))
                 .andExpect(jsonPath("$.bio").value("bio"));
+
+        verify(profileService).updateMyProfile(1L, request);
     }
 
     @Test
@@ -88,5 +92,7 @@ class ProfileControllerTest {
                 .andExpect(jsonPath("$.username").value("user"))
                 .andExpect(jsonPath("$.displayName").value("User"))
                 .andExpect(jsonPath("$.bio").value("bio"));
+
+        verify(profileService).getPublicByUsername("user");
     }
 }

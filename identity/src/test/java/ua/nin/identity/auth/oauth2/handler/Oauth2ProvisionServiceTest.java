@@ -1,4 +1,4 @@
-package ua.nin.identity.auth.service;
+package ua.nin.identity.auth.oauth2.handler;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -6,7 +6,6 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ua.nin.identity.auth.dto.OAuth2UserDto;
 import ua.nin.identity.auth.exception.exceptions.FailedUniqueUsernameCreationException;
-import ua.nin.identity.auth.exception.exceptions.NotFoundException;
 import ua.nin.identity.auth.exception.exceptions.UserNotFoundException;
 import ua.nin.identity.auth.model.OAuth2Identity;
 import ua.nin.identity.auth.model.Provider;
