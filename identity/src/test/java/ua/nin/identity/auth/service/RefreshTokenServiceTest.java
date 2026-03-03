@@ -63,7 +63,7 @@ class RefreshTokenServiceTest {
         ArgumentCaptor<RefreshToken> tokenCaptor = ArgumentCaptor.forClass(RefreshToken.class);
         verify(refreshTokenRepository).save(tokenCaptor.capture());
         assertEquals("hash-token", tokenCaptor.getValue().getTokenHash());
-        assertEquals(55L, tokenCaptor.getValue().getFamilyId());
+        assertEquals(55L, tokenCaptor.getValue().getFamily().getId());
         assertEquals(user, tokenCaptor.getValue().getUser());
         assertTrue(tokenCaptor.getValue().getExpiresAt().isAfter(Instant.now().plus(6, ChronoUnit.DAYS)));
     }
@@ -79,7 +79,7 @@ class RefreshTokenServiceTest {
     void rotate_familyRevoked_throws() {
         when(timeTokenUtils.hash("raw")).thenReturn("hash");
         RefreshToken token = RefreshToken.builder()
-                .familyId(10L)
+                .family(RefreshTokenFamily.builder().id(10L).build())
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .build();
@@ -100,7 +100,7 @@ class RefreshTokenServiceTest {
     void rotate_expiredToken_revokesFamily() {
         when(timeTokenUtils.hash("raw")).thenReturn("hash");
         RefreshToken token = RefreshToken.builder()
-                .familyId(10L)
+                .family(RefreshTokenFamily.builder().id(10L).build())
                 .issuedAt(Instant.now().minus(10, ChronoUnit.DAYS))
                 .expiresAt(Instant.now().minus(1, ChronoUnit.DAYS))
                 .build();
@@ -123,7 +123,7 @@ class RefreshTokenServiceTest {
     void rotate_reuseDetected_revokesFamily() {
         when(timeTokenUtils.hash("raw")).thenReturn("hash");
         RefreshToken token = RefreshToken.builder()
-                .familyId(10L)
+                .family(RefreshTokenFamily.builder().id(10L).build())
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .revokedAt(Instant.now())
@@ -154,7 +154,7 @@ class RefreshTokenServiceTest {
         RefreshToken token = RefreshToken.builder()
                 .id(2L)
                 .user(user)
-                .familyId(10L)
+                .family(RefreshTokenFamily.builder().id(10L).build())
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .build();
@@ -194,7 +194,7 @@ class RefreshTokenServiceTest {
     @Test
     void revokeByRefresh_existingToken_revokesFamily() {
         when(timeTokenUtils.hash("raw")).thenReturn("hash");
-        RefreshToken token = RefreshToken.builder().familyId(5L).build();
+        RefreshToken token = RefreshToken.builder().family(RefreshTokenFamily.builder().id(5L).build()).build();
         when(refreshTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
 
         refreshTokenService.revokeByRefresh("raw");

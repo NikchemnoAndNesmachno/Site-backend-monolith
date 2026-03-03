@@ -13,9 +13,6 @@ import lombok.*;
 @Table(
         schema = "media",
         name = "media_bundle_items",
-//        uniqueConstraints = {
-//                @UniqueConstraint(name = "uq_media_bundle_items_media_id", columnNames = "media_id")
-//        },
         indexes = {
                 @Index(name = "idx_media_bundle_items_bundle", columnList = "bundle_id"),
                 @Index(name = "idx_media_bundle_items_media", columnList = "media_id")

@@ -91,7 +91,7 @@ class OAuth2SuccessHandlerTest {
         when(provisionService.provision(any(OAuth2UserDto.class))).thenReturn(user);
 
         // refresh issue
-        when(refreshTokenService.issueNew(eq(user), eq("JUnit-UA"), eq("203.0.113.10")))
+        when(refreshTokenService.issueNew(user, "JUnit-UA", "203.0.113.10"))
                 .thenReturn(new IssueNewResult("raw.refresh.token", 55L));
 
         // access issue
@@ -112,10 +112,10 @@ class OAuth2SuccessHandlerTest {
         assertThat(dto.picture()).isEqualTo("https://img.example/x.png");
 
         // verify tokens + cookie
-        verify(refreshTokenService).issueNew(eq(user), eq("JUnit-UA"), eq("203.0.113.10"));
+        verify(refreshTokenService).issueNew(user, "JUnit-UA", "203.0.113.10");
         verify(accessTokenService).createAccessToken(eq(777L), rolesCaptor.capture());
         assertThat(rolesCaptor.getValue()).containsExactly("USER");
-        verify(cookieService).setRefreshCookie(eq(response), eq("raw.refresh.token"));
+        verify(cookieService).setRefreshCookie(response, "raw.refresh.token");
 
         // verify response
         assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_OK);

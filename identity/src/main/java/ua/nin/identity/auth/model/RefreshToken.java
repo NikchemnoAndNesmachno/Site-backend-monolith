@@ -27,8 +27,11 @@ public class RefreshToken {
     @Column(name = "token_hash", nullable = false, unique = true)
     private String tokenHash;
 
-    @Column(name = "family_id", nullable = false)
-    private Long familyId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "family_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false, insertable = false, updatable = false)
+    @ToString.Exclude
+    private RefreshTokenFamily family;
 
     @Column(name = "issued_at", nullable = false)
     private Instant issuedAt;
