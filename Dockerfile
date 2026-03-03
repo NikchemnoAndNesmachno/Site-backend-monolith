@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21.0.10_7-jre-ubi10-minimal
 WORKDIR /app
 
 # (Опціонально) безпечніше не під root
