@@ -16,8 +16,8 @@ env:
 jobs:
 
   build:
-    #    runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    # runs-on: self-hosted
         
     # Add permissions to allow the GITHUB_TOKEN to write Check Runs
     permissions:
@@ -38,20 +38,21 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-
-#    - name: Cache SonarQube packages
-#      uses: actions/cache@v5
-#      with:
-#        path: ~/.sonar/cache
-#        key: ${{ runner.os }}-sonar
-#        restore-keys: ${{ runner.os }}-sonar
-
-#    - name: Cache Maven packages
-#      uses: actions/cache@v5
-#      with:
-#        path: ~/.m2
-#        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-#        restore-keys: ${{ runner.os }}-m2
+# 
+    - name: Cache SonarQube packages
+      uses: actions/cache@v5
+      with:
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+# 
+    - name: Cache Maven packages
+      uses: actions/cache@v5
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+# 
 
     - name: Build with Maven and Sonar Analysis
 
@@ -112,8 +113,8 @@ jobs:
         maven-args: -DskipTests
 
   docker-build:
-    #    runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    # runs-on: self-hosted
 
     permissions:
       checks: write
@@ -148,8 +149,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
   deploy:
-    #    runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    # runs-on: self-hosted
 
     permissions:
       checks: write
