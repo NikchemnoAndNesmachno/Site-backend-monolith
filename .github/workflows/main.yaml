@@ -17,6 +17,9 @@ permissions:
 
 jobs:
   build:
+    permissions:
+      contents: write
+      checks: write
     uses: ./.github/workflows/build-tests-sonar.yml
     secrets: inherit
     with:
@@ -24,14 +27,26 @@ jobs:
       springBootJarName: ${{ vars.SPRING_BOOT_JAR_NAME }}
 
   codeql:
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
     uses: ./.github/workflows/codeql.yml
     secrets: inherit
 
   qodana:
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
     uses: ./.github/workflows/qodana_code_quality.yml
     secrets: inherit
 
   docker:
+    permissions:
+      contents: read
+      security-events: write
     uses: ./.github/workflows/docker-build-scan-push.yml
     needs: [build, qodana]
     secrets: inherit
@@ -42,6 +57,9 @@ jobs:
       sha_short: ${{ needs.build.outputs.sha_short }}
 
   deploy:
+    permissions:
+      contents: write
+      checks: write
     if: ${{ github.event_name == 'push' }}
     uses: ./.github/workflows/deploy.yml
     needs: docker
