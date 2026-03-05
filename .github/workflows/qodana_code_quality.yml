@@ -1,4 +1,5 @@
 name: Qodana
+
 on:
   workflow_call: {}
 
