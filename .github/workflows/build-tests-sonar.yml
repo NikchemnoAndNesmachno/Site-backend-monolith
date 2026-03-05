@@ -94,7 +94,7 @@ jobs:
           fail-on-empty: false
 
       - name: Rename user jar to app
-        run: mv ${{ env.MODULE }}/target/*.jar ${{ env.MODULE }}/target/${{ env.JAR }}
+        run: mv $MODULE/target/*.jar $MODULE/target/$JAR
 
       - name: Upload app jar artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
