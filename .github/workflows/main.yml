@@ -126,7 +126,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Download app jar artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: app-jar
           path: ${{ env.springBootModuleName }}/target
