@@ -28,7 +28,7 @@ jobs:
       GITHUB_SHA_SHORT: ${{ steps.set-outputs.outputs.GITHUB_SHA_SHORT }}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
         lfs: true
@@ -123,7 +123,7 @@ jobs:
 
     needs: build
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Download app jar artifact
         uses: actions/download-artifact@v5
@@ -189,7 +189,7 @@ jobs:
 
     needs: docker-build
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Deploy 🚀
         if: ${{ github.event_name == 'push' }}
