@@ -1,4 +1,6 @@
-FROM eclipse-temurin:21.0.10_7-jre-ubi10-minimal
+#FROM eclipse-temurin:21.0.10_7-jre-ubi10-minimal - no known vulnerabilties
+#eclipse-temurin:21-jre with vulnerabilities here is just to check how CI/CD stuff works. Change it later
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # (Опціонально) безпечніше не під root
