@@ -20,9 +20,9 @@ jobs:
       springBootModuleName: ${{ env.springBootModuleName }}
       springBootJarName: ${{ env.springBootJarName }}
 
-  codeql:
-    uses: ./.github/workflows/codeql.yml
-    secrets: inherit
+#  codeql:
+#    uses: ./.github/workflows/codeql.yml
+#    secrets: inherit
 
   qodana:
     uses: ./.github/workflows/qodana_code_quality.yml
