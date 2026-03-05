@@ -7,22 +7,17 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-env:
-  springBootModuleName: app
-  springBootJarName: app.jar
-  dockerRepoName: bucketblueberry/nin-backend
-
 jobs:
   build:
     uses: ./.github/workflows/build-tests-sonar.yml
     secrets: inherit
     with:
-      springBootModuleName: ${{ env.springBootModuleName }}
-      springBootJarName: ${{ env.springBootJarName }}
+      springBootModuleName: ${{ vars.SPRING_BOOT_MODULE_NAME }}
+      springBootJarName: ${{ vars.SPRING_BOOT_JAR_NAME }}
 
-#  codeql:
-#    uses: ./.github/workflows/codeql.yml
-#    secrets: inherit
+  codeql:
+    uses: ./.github/workflows/codeql.yml
+    secrets: inherit
 
   qodana:
     uses: ./.github/workflows/qodana_code_quality.yml
@@ -33,9 +28,9 @@ jobs:
     needs: [build, qodana]
     secrets: inherit
     with:
-      dockerRepoName: ${{ env.dockerRepoName }}
-      springBootModuleName: ${{ env.springBootModuleName }}
-      springBootJarName: ${{ env.springBootJarName }}
+      dockerRepoName: ${{ vars.DOCKER_REPO_NAME }}
+      springBootModuleName: ${{ vars.SPRING_BOOT_MODULE_NAME }}
+      springBootJarName: ${{ vars.SPRING_BOOT_JAR_NAME }}
       sha_short: ${{ needs.build.outputs.sha_short }}
 
   deploy:
