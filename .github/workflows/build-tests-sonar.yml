@@ -13,6 +13,14 @@ on:
       sha_short:
         description: "Short SHA for tags/artifacts"
         value: ${{ jobs.build.outputs.sha_short }}
+    secrets:
+      SONAR_TOKEN:
+        required: true
+
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  MODULE: ${{ inputs.springBootModuleName }}
+  JAR: ${{ inputs.springBootJarName }}
 
 jobs:
   build:
@@ -57,7 +65,7 @@ jobs:
       - name: Maven build & Tests & Sonar analysis.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
           PR_KEY: ${{ github.event.pull_request.number }}
           PR_BRANCH: ${{ github.head_ref }}
           PR_BASE: ${{ github.base_ref }}
@@ -76,8 +84,7 @@ jobs:
           eval "$SONAR_CMD"
 
       - name: Test Reporter
-#        uses: dorny/test-reporter@3d76b34a4535afbd0600d347b09a6ee5deb3ed7f # v2.6.0
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@3d76b34a4535afbd0600d347b09a6ee5deb3ed7f # v2.6.0
         if: success() || failure()
         with:
           name: Tests Report
@@ -87,13 +94,13 @@ jobs:
           fail-on-empty: false
 
       - name: Rename user jar to app
-        run: mv ${{ inputs.springBootModuleName }}/target/*.jar ${{ inputs.springBootModuleName }}/target/${{ inputs.springBootJarName }}
+        run: mv ${{ env.MODULE }}/target/*.jar ${{ env.MODULE }}/target/${{ env.JAR }}
 
       - name: Upload app jar artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: app-jar
-          path: ${{ inputs.springBootModuleName }}/target/${{ inputs.springBootJarName }}
+          path: ${{ env.MODULE }}/target/${{ env.JAR }}
           if-no-files-found: error
 
       - name: Set sha_short output

@@ -1,7 +1,13 @@
 name: Qodana
 
 on:
-  workflow_call: {}
+  workflow_call:
+    secrets:
+      QODANA_TOKEN:
+        required: true
+
+env:
+  QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
 jobs:
   qodana:
@@ -30,5 +36,5 @@ jobs:
           cache-dir: ${{ runner.temp }}/qodana/caches
           args: --baseline,qodana.sarif.json
         env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1016867356 }}
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
           QODANA_ENDPOINT: 'https://qodana.cloud'
