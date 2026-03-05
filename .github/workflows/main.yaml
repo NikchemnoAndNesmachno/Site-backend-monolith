@@ -7,6 +7,14 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  checks: write
+  pull-requests: write
+  security-events: write
+  actions: read
+  packages: read
+
 jobs:
   build:
     uses: ./.github/workflows/build-tests-sonar.yml
