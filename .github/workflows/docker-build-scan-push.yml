@@ -1,0 +1,91 @@
+name: Docker build / Trivy scan / Push
+
+on:
+  workflow_call:
+    inputs:
+      dockerRepoName:
+        required: true
+        type: string
+      springBootModuleName:
+        required: true
+        type: string
+      springBootJarName:
+        required: true
+        type: string
+      sha_short:
+        required: true
+        type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  docker:
+#    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Download app jar artifact
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: app-jar
+          path: ${{ inputs.springBootModuleName }}/target
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Build Docker image (load local)
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          load: true
+          tags: ${{ inputs.dockerRepoName }}:tag-${{ inputs.sha_short }}
+          cache-from: ${{ runner.environment == 'self-hosted' && 'type=local' || 'type=gha' }}
+          cache-to: ${{ runner.environment == 'self-hosted' && 'type=local' || 'type=gha,mode=max' }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@97e0b3872f55f89b95b2f65b3dbab56962816478 # v0.34.2
+        with:
+          image-ref: '${{ inputs.dockerRepoName }}:tag-${{ inputs.sha_short }}'
+          format: 'template'
+          template: '@/contrib/sarif.tpl'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          cache: ${{ runner.environment != 'self-hosted' }}
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@c793b717bc78562f491db7b0e93a3a178b099162 # v4.32.5
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Docker Login
+        if: ${{ github.event_name == 'push' }}
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: ${{ github.event_name == 'push' }}
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ inputs.dockerRepoName }}:tag-${{ inputs.sha_short }}
+          cache-from: ${{ runner.environment == 'self-hosted' && 'type=local' || 'type=gha' }}
+          cache-to: ${{ runner.environment == 'self-hosted' && 'type=local' || 'type=gha,mode=max' }}

@@ -1,0 +1,60 @@
+name: CI/CD
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    permissions:
+      contents: write
+      checks: write
+    uses: ./.github/workflows/build-tests-sonar.yml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    with:
+      springBootModuleName: ${{ vars.SPRING_BOOT_MODULE_NAME }}
+      springBootJarName: ${{ vars.SPRING_BOOT_JAR_NAME }}
+
+  codeql:
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    uses: ./.github/workflows/codeql.yml
+
+  qodana:
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    uses: ./.github/workflows/qodana_code_quality.yml
+    secrets:
+      QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1016867356 }}
+
+  docker:
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/docker-build-scan-push.yml
+    needs: [build, codeql, qodana]
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    with:
+      dockerRepoName: ${{ vars.DOCKER_REPO_NAME }}
+      springBootModuleName: ${{ vars.SPRING_BOOT_MODULE_NAME }}
+      springBootJarName: ${{ vars.SPRING_BOOT_JAR_NAME }}
+      sha_short: ${{ needs.build.outputs.sha_short }}
+
+  deploy:
+    permissions:
+      contents: write
+      checks: write
+    if: ${{ github.event_name == 'push' }}
+    uses: ./.github/workflows/deploy.yml
+    needs: docker
