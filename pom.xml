@@ -48,7 +48,7 @@
         <apache.commons.validator.version>1.10.1</apache.commons.validator.version>
         <apache.hibernate.utils.types>3.14.1</apache.hibernate.utils.types>
 
-        <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
         <jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
 
         <org.apache.commons-lang3.version>3.18.0</org.apache.commons-lang3.version>
