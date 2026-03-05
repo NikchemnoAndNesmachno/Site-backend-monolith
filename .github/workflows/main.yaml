@@ -40,7 +40,7 @@ jobs:
       contents: read
       security-events: write
     uses: ./.github/workflows/docker-build-scan-push.yml
-    needs: [build, qodana]
+    needs: [build, codeql, qodana]
     secrets: inherit
     with:
       dockerRepoName: ${{ vars.DOCKER_REPO_NAME }}
