@@ -92,6 +92,7 @@ jobs:
             **/target/surefire-reports/*.xml
           reporter: java-junit
           fail-on-empty: false
+          use-actions-summary: false
 
       - name: Rename user jar to app
         run: mv $MODULE/target/*.jar $MODULE/target/$JAR
