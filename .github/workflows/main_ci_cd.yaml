@@ -1,0 +1,45 @@
+name: CI/CD Orchestrator
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  springBootModuleName: app
+  springBootJarName: app.jar
+  dockerRepoName: bucketblueberry/nin-backend
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-tests-sonar.yml
+    secrets: inherit
+    with:
+      springBootModuleName: ${{ env.springBootModuleName }}
+      springBootJarName: ${{ env.springBootJarName }}
+
+  codeql:
+    uses: ./.github/workflows/codeql.yml
+    secrets: inherit
+
+  qodana:
+    uses: ./.github/workflows/qodana_code_quality.yml
+    secrets: inherit
+
+  docker:
+    uses: ./.github/workflows/docker-build-scan-push.yml
+    needs: [build, qodana]
+    secrets: inherit
+    with:
+      dockerRepoName: ${{ env.dockerRepoName }}
+      springBootModuleName: ${{ env.springBootModuleName }}
+      springBootJarName: ${{ env.springBootJarName }}
+      sha_short: ${{ needs.build.outputs.sha_short }}
+
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    uses: ./.github/workflows/deploy.yml
+    needs: docker
+    secrets: inherit
