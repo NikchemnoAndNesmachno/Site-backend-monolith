@@ -27,8 +27,8 @@ env:
 
 jobs:
   docker:
-    runs-on: self-hosted
-#    runs-on: ubuntu-latest
+#    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
@@ -53,8 +53,8 @@ jobs:
           push: false
           load: true
           tags: ${{ inputs.dockerRepoName }}:tag-${{ inputs.sha_short }}
-          cache-from: ${{ runner.environment == 'self-hosted' && '' || 'type=gha' }}
-          cache-to: ${{ runner.environment == 'self-hosted' && '' || 'type=gha,mode=max' }}
+          cache-from: ${{ runner.environment == 'self-hosted' && 'type=local' || 'type=gha' }}
+          cache-to: ${{ runner.environment == 'self-hosted' && 'type=local' || 'type=gha,mode=max' }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@97e0b3872f55f89b95b2f65b3dbab56962816478 # v0.34.2
@@ -87,5 +87,5 @@ jobs:
           file: Dockerfile
           push: true
           tags: ${{ inputs.dockerRepoName }}:tag-${{ inputs.sha_short }}
-          cache-from: ${{ runner.environment == 'self-hosted' && '' || 'type=gha' }}
-          cache-to: ${{ runner.environment == 'self-hosted' && '' || 'type=gha,mode=max' }}
+          cache-from: ${{ runner.environment == 'self-hosted' && 'type=local' || 'type=gha' }}
+          cache-to: ${{ runner.environment == 'self-hosted' && 'type=local' || 'type=gha,mode=max' }}
