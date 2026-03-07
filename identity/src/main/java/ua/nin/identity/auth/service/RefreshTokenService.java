@@ -100,14 +100,14 @@ public class RefreshTokenService {
         // 2) expiry
         if (current.isExpired(now)) {
             // можна ревокнути токен або навіть family
-            revokeFamilyInternal(family.getId(), now);
+            revokeFamilyInternal(family, now);
             throw new InvalidRefreshTokenException("Refresh token expired");
         }
 
         // 3) reuse detection: якщо токен вже був використаний для rotation або logout
         if (current.isRevoked() || current.getReplacedBy() != null) {
             // компрометація: відрубаємо всю family, щоб атакер не міг продовжити
-            revokeFamilyInternal(family.getId(), now);
+            revokeFamilyInternal(family, now);
             throw new RefreshReuseDetectedException("Refresh reuse detected - family revoked");
         }
 
@@ -150,7 +150,7 @@ public class RefreshTokenService {
         String hash = timeTokenUtils.hash(rawRefreshToken);
 
         refreshTokenRepository.findByTokenHash(hash)
-                .ifPresent(token -> revokeFamilyInternal(token.getFamily().getId(), now));
+                .ifPresent(token -> revokeFamilyInternal(token.getFamily(), now));
     }
 
     /**
@@ -171,11 +171,11 @@ public class RefreshTokenService {
         Instant now = Instant.now();
         RefreshTokenFamily family = familyRepository.findByIdAndUser_Id(familyId, userId)
                 .orElseThrow(() -> new InvalidRefreshTokenException("Family not found"));
-        revokeFamilyInternal(family.getId(), now);
+        revokeFamilyInternal(family, now);
     }
 
-    private void revokeFamilyInternal(long familyId, Instant now) {
-        familyRepository.revokeFamily(familyId, now);
-        refreshTokenRepository.revokeAllInFamily(familyId, now);
+    private void revokeFamilyInternal(RefreshTokenFamily family, Instant now) {
+        familyRepository.revokeFamily(family.getId(), now);
+        refreshTokenRepository.revokeAllInFamily(family, now);
     }
 }

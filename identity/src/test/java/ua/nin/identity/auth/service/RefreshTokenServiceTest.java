@@ -116,7 +116,7 @@ class RefreshTokenServiceTest {
                 .hasMessageContaining("expired");
 
         verify(familyRepository).revokeFamily(eq(10L), any(Instant.class));
-        verify(refreshTokenRepository).revokeAllInFamily(eq(10L), any(Instant.class));
+        verify(refreshTokenRepository).revokeAllInFamily(eq(family), any(Instant.class));
     }
 
     @Test
@@ -140,7 +140,7 @@ class RefreshTokenServiceTest {
                 .hasMessageContaining("reuse detected");
 
         verify(familyRepository).revokeFamily(eq(10L), any(Instant.class));
-        verify(refreshTokenRepository).revokeAllInFamily(eq(10L), any(Instant.class));
+        verify(refreshTokenRepository).revokeAllInFamily(eq(family), any(Instant.class));
     }
 
     @Test
@@ -194,13 +194,14 @@ class RefreshTokenServiceTest {
     @Test
     void revokeByRefresh_existingToken_revokesFamily() {
         when(timeTokenUtils.hash("raw")).thenReturn("hash");
-        RefreshToken token = RefreshToken.builder().family(RefreshTokenFamily.builder().id(5L).build()).build();
+        RefreshTokenFamily family = RefreshTokenFamily.builder().id(5L).build();
+        RefreshToken token = RefreshToken.builder().family(family).build();
         when(refreshTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
 
         refreshTokenService.revokeByRefresh("raw");
 
         verify(familyRepository).revokeFamily(eq(5L), any(Instant.class));
-        verify(refreshTokenRepository).revokeAllInFamily(eq(5L), any(Instant.class));
+        verify(refreshTokenRepository).revokeAllInFamily(eq(family), any(Instant.class));
     }
 
     @Test

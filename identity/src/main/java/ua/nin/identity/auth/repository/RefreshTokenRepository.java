@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ua.nin.identity.auth.model.RefreshToken;
+import ua.nin.identity.auth.model.RefreshTokenFamily;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -17,10 +18,10 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Query("""
         UPDATE RefreshToken t
            SET t.revokedAt = :now
-         WHERE t.familyId = :familyId
+         WHERE t.family = :family
            AND t.revokedAt is null
         """)
-    void revokeAllInFamily(long familyId, Instant now);
+    void revokeAllInFamily(RefreshTokenFamily family, Instant now);
 
     @Modifying
     @Query("""
