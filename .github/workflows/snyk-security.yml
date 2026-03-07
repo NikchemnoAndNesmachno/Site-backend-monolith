@@ -64,7 +64,7 @@ jobs:
 
       # SAST -> GitHub Code Scanning
       - name: Snyk Code (SAST)
-        run: snyk code test --org=${{ env.SNYK_ORG_ID }} --severity-threshold=high --sarif-file-output=snyk-code.sarif
+        run: snyk code -d test --org=${{ env.SNYK_ORG_ID }} --severity-threshold=high --sarif-file-output=snyk-code.sarif
         
         # Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
       
