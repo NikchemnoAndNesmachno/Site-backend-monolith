@@ -29,7 +29,6 @@ public class RefreshToken {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "family_id", referencedColumnName = "id", nullable = false)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false, insertable = false, updatable = false)
     @ToString.Exclude
     private RefreshTokenFamily family;
 
