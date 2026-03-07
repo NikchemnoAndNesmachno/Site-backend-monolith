@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
     # This is where you will need to introduce the Snyk API token created with your Snyk account
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +64,7 @@ jobs:
 
       # SAST -> GitHub Code Scanning
       - name: Snyk Code (SAST)
-        run: snyk code test --severity-threshold=high --sarif-file-output=snyk-code.sarif
+        run: snyk code test --org=${{ env.SNYK_ORG_ID }} --severity-threshold=high --sarif-file-output=snyk-code.sarif
         
         # Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
       
@@ -72,12 +73,12 @@ jobs:
     
       # SCA gate (PR + push)
       - name: Snyk Open Source (SCA) gate
-        run: snyk test --all-projects --severity-threshold=high
+        run: snyk test --org=${{ env.SNYK_ORG_ID }} --all-projects --severity-threshold=high
 
         # Runs Snyk Infrastructure as Code (IaC) analysis and uploads result to Snyk.
         # Use || true to not fail the pipeline.
       - name: Snyk IaC test and report
-        run: snyk iac test --report # || true
+        run: snyk iac --org=${{ env.SNYK_ORG_ID }} test --report # || true
 
         # Build the docker image for testing
       # - name: Build a Docker image
