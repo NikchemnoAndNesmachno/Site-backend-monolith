@@ -33,6 +33,8 @@
         <module>app</module>
         <module>common</module>
         <module>contract-api</module>
+        <module>feed</module>
+
         <module>identity</module>
         <module>media</module>
         <module>reactions</module>
