@@ -2,14 +2,23 @@ package ua.nin.media.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ua.nin.contract.feed.FeedSort;
+import ua.nin.contract.feed.VideoFeedQueryPort;
+import ua.nin.contract.feed.dto.FeedVideoBaseView;
+import ua.nin.contract.feed.dto.FeedVideoPage;
 import ua.nin.media.dto.VideoWithPreviewUploadResponse;
 import ua.nin.media.exception.exceptions.VideoForbiddenDeletionException;
 import ua.nin.media.exception.exceptions.VideoNotFound;
 import ua.nin.media.model.*;
 import ua.nin.media.repository.VideoRepository;
+import ua.nin.media.repository.projection.VideoFeedRowProjection;
+
+import java.util.List;
 
 import static ua.nin.common.constant.ErrorMessage.USER_NOT_ALLOWED_TO_DELETE_VIDEO;
 import static ua.nin.common.constant.ErrorMessage.VIDEO_NOT_FOUND;
@@ -17,10 +26,47 @@ import static ua.nin.common.constant.ErrorMessage.VIDEO_NOT_FOUND;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class VideoService {
+public class VideoService implements VideoFeedQueryPort {
 
     private final VideoRepository videoRepository;
     private final MediaService mediaService;
+
+    @Override
+    public FeedVideoPage findPublicVideoPage(int page, int size, FeedSort sort) {
+        PageRequest pageable = PageRequest.of(page, size);
+
+        Page<VideoFeedRowProjection> result = switch (sort) {
+            case POPULAR -> videoRepository.findPublicFeedPopular(pageable);
+            case LATEST -> videoRepository.findPublicFeedLatest(pageable);
+        };
+
+        List<FeedVideoBaseView> items = result.getContent().stream()
+                .map(this::toBaseView)
+                .toList();
+
+        return new FeedVideoPage(
+                items,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.hasNext()
+        );
+    }
+
+    private FeedVideoBaseView toBaseView(VideoFeedRowProjection row) {
+        return new FeedVideoBaseView(
+                row.getVideoId(),
+                row.getTitle(),
+                row.getDescription(),
+                row.getOwnerUserId(),
+                row.getOwnerUsername(),
+                row.getOwnerDisplayName(),
+                row.getOwnerAvatarMediaId(),
+                row.getPreviewMediaId(),
+                row.getCreatedAt()
+        );
+    }
 
     @Transactional
     public VideoWithPreviewUploadResponse uploadVideoWithPreview(String title, String description, VideoVisibility visibility, long ownerUserId, MultipartFile videoFile, MultipartFile previewFile) {

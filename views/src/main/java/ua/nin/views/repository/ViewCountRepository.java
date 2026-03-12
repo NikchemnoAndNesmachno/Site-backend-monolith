@@ -5,6 +5,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 import ua.nin.views.model.ViewCount;
+import ua.nin.views.repository.projection.VideoViewCountRow;
+
+import java.util.Collection;
+import java.util.List;
 
 import static ua.nin.views.model.ViewCount.ViewCountId;
 
@@ -36,4 +40,15 @@ public interface ViewCountRepository extends Repository<ViewCount, ViewCountId> 
            """)
     ViewCount findCountsByTarget(@Param("targetType") String targetType,
                                        @Param("targetId") long targetId);
+
+    @Query(value = """
+            SELECT
+                vc.target_id    AS videoId,
+                vc.total_views  AS viewsCount
+            FROM views.view_counts vc
+            WHERE vc.target_type = 'VIDEO'
+              AND vc.target_id IN (:videoIds)
+            """,
+            nativeQuery = true)
+    List<VideoViewCountRow> findViewCountsByVideoIds(Collection<Long> videoIds);
 }
