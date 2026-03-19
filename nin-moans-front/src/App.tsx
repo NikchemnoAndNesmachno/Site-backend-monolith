@@ -1,32 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import { useAuth } from './context/AuthContext';
 import type {JSX} from "react";
-
-function HomePage() {
-    const { user, logout, isInitializing } = useAuth();
-
-    if (isInitializing) {
-        return <div>Loading auth...</div>;
-    }
-
-    return (
-        <div style={{ padding: 24 }}>
-            <h1>Home</h1>
-            {user ? (
-                <>
-                    <p>User ID: {user.id}</p>
-                    {/*<p>Email: {user.email}</p>*/}
-                    <p>Role: {user.role}</p>
-                    <button onClick={() => void logout()}>Logout</button>
-                </>
-            ) : (
-                <p>Guest</p>
-            )}
-        </div>
-    );
-}
+import useAuth from "./hooks/useAuth.ts";
+import {HomePage} from "./pages/HomePage.tsx";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
     const { isAuthenticated, isInitializing } = useAuth();

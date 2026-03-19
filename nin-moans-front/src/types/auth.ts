@@ -1,8 +1,19 @@
 export type UserRole = 'USER' | 'ADMIN' | string;
 
+export type AuthContextType = {
+    user: AuthUser | null;
+    accessToken: string | null;
+    isAuthenticated: boolean;
+    isInitializing: boolean;
+    login: (payload: LoginRequest) => Promise<void>;
+    register: (payload: RegisterRequest) => Promise<void>;
+    logout: () => Promise<void>;
+    refresh: () => Promise<void>;
+};
+
 export type AuthUser = {
     id: number;
-    // email: string;
+    email: string;
     role: UserRole;
 };
 
@@ -12,6 +23,7 @@ export type AuthResponse = {
     // user: AuthUser;
     tokenType: string;
     userId: number;
+    email: string;
     role: UserRole;
 };
 

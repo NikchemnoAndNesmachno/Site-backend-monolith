@@ -1,0 +1,12 @@
+.video-card__thumbnail-wrapper {
+    width: 240px;
+    height: 135px;
+}
+
+.video-card__thumbnail {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 12px;
+}

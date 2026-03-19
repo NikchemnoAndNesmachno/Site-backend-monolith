@@ -1,86 +1,71 @@
-import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { extractApiErrorMessage, useAuth } from '../context/AuthContext';
-
-type LoginFormState = {
-    email: string;
-    password: string;
-};
-
-const initialState: LoginFormState = {
-    email: '',
-    password: '',
-};
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import useAuth from "../hooks/useAuth.ts";
+import {useLoginMutation} from "../hooks/useLoginMutation.ts";
+import {type LoginFormValues, loginSchema} from "../validation/authSchemas.ts";
+import {useLocation} from "react-router-dom";
+import extractApiErrorMessage from "../api/extractApiErrorMessage.ts";
 
 export default function LoginPage() {
-    const { login, isAuthenticated } = useAuth();
-    const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+    const loginMutation = useLoginMutation();
+    const location = useLocation();
 
-    const [form, setForm] = useState<LoginFormState>(initialState);
-    const [error, setError] = useState<string>('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormValues>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+        },
+        mode: 'onSubmit',
+    });
 
-    const handleChange = (field: keyof LoginFormState, value: string) => {
-        setForm((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
+    const onSubmit = async (data: LoginFormValues) => {
+        await loginMutation.mutateAsync(data);
     };
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setIsSubmitting(true);
+    const serverError = loginMutation.error
+        ? extractApiErrorMessage(loginMutation.error)
+        : '';
 
-        try {
-            await login({
-                email: form.email.trim(),
-                password: form.password,
-            });
-
-            navigate('/');
-        } catch (err) {
-            setError(extractApiErrorMessage(err));
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    const successMessage =
+        location.state && (location.state as { registered?: boolean }).registered
+            ? 'Registration completed. Now log in.'
+            : '';
 
     if (isAuthenticated) {
-        return <div>Вы уже залогинены.</div>;
+        return <div>Ви вже увійшли.</div>;
     }
 
     return (
         <div style={containerStyle}>
-            <form onSubmit={handleSubmit} style={formStyle}>
+            <form onSubmit={handleSubmit(onSubmit)} style={formStyle} noValidate>
                 <h1>Login</h1>
 
                 <label style={labelStyle}>
                     Email
                     <input
                         type="email"
-                        value={form.email}
-                        onChange={(e) => handleChange('email', e.target.value)}
-                        required
                         maxLength={64}
                         style={inputStyle}
+                        {...register('email')}
                     />
+                    {errors.email && <div style={errorStyle}>{errors.email.message}</div>}
                 </label>
 
                 <label style={labelStyle}>
                     Password
                     <input
                         type="password"
-                        value={form.password}
-                        onChange={(e) => handleChange('password', e.target.value)}
-                        required
-                        minLength={8}
                         maxLength={72}
                         style={inputStyle}
+                        {...register('password')}
                     />
+                    {errors.password && <div style={errorStyle}>{errors.password.message}</div>}
                 </label>
 
-                {error && <div style={errorStyle}>{error}</div>}
+                {serverError && <div style={errorStyle}>{serverError}</div>}
+                {successMessage && <div style={successStyle}>{successMessage}</div>}
 
                 <button type="submit" disabled={isSubmitting} style={buttonStyle}>
                     {isSubmitting ? 'Logging in...' : 'Login'}
@@ -127,5 +112,10 @@ const buttonStyle: React.CSSProperties = {
 
 const errorStyle: React.CSSProperties = {
     color: 'crimson',
+    fontSize: '14px',
+};
+
+const successStyle: React.CSSProperties = {
+    color: 'green',
     fontSize: '14px',
 };
