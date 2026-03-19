@@ -8,5 +8,6 @@ public record FeedVideoPage(
         int size,
         long totalElements,
         int totalPages,
-        boolean hasNext
+        boolean hasNext,
+        boolean hasPrevious
 ) {}

@@ -50,7 +50,8 @@ public class VideoService implements VideoFeedQueryPort {
                 result.getSize(),
                 result.getTotalElements(),
                 result.getTotalPages(),
-                result.hasNext()
+                result.hasNext(),
+                result.hasPrevious()
         );
     }
 

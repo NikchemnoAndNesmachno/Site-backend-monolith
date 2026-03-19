@@ -40,7 +40,8 @@ public class FeedService {
                     videoPage.size(),
                     videoPage.totalElements(),
                     videoPage.totalPages(),
-                    videoPage.hasNext()
+                    videoPage.hasNext(),
+                    videoPage.hasPrevious()
             );
         }
 
@@ -74,7 +75,8 @@ public class FeedService {
                 videoPage.size(),
                 videoPage.totalElements(),
                 videoPage.totalPages(),
-                videoPage.hasNext()
+                videoPage.hasNext(),
+                videoPage.hasPrevious()
         );
     }
 

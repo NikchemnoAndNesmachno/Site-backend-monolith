@@ -115,6 +115,7 @@ public class AuthService {
                 "Bearer",
                 accessTtlMinutes * 60,
                 user.getId(),
+                user.getEmail(),
                 role
         );
 
@@ -143,6 +144,7 @@ public class AuthService {
                 "Bearer",
                 accessTtlMinutes * 60,
                 user.getId(),
+                user.getEmail(),
                 role
         );
 
