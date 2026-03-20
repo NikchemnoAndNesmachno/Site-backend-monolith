@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import ua.nin.contract.feed.dto.FeedVideoBaseView;
 import ua.nin.media.model.Video;
 import ua.nin.media.repository.projection.VideoFeedRowProjection;
 
@@ -69,8 +68,7 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
              AND vc.target_id = v.id
             WHERE v.visibility = 'PUBLIC'
               AND v.status = 'READY'
-//          -- ORDER BY COALESCE(vc.total_views, 0) DESC, v.created_at DESC
-            ORDER BY vc.total_views DESC NULLS LAST
+            ORDER BY COALESCE(vc.total_views, 0) DESC, v.created_at DESC
             """,
             countQuery = """
             SELECT COUNT(*)
