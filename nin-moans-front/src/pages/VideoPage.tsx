@@ -216,7 +216,7 @@ export function VideoPage() {
             <section className="video-page__content-card">
                 <p className="video-page__eyebrow">About this video</p>
                 <h1 className="video-page__title">{details.title}</h1>
-                <p className="video-page__description">{details.description || "Описание пока не добавлено."}</p>
+                <p className="video-page__description">{details.description || "Опис поки не додано."}</p>
             </section>
         </main>
     );

@@ -1,5 +1,5 @@
 import type { AuthResponse } from '../types/auth';
-import {axiosPrivate} from "./axios.ts";
+import {axiosRefresh} from "./axios.ts";
 import {tokenStorage} from "./tokenStorage.ts";
 
 let refreshPromise: Promise<AuthResponse> | null = null;
@@ -17,7 +17,7 @@ export const bindAuthHandlers = (handlers: AuthHandlers) => {
 
 export const performRefresh = async (): Promise<AuthResponse> => {
     if (!refreshPromise) {
-        refreshPromise = axiosPrivate
+        refreshPromise = axiosRefresh
             .post<AuthResponse>('/api/v1/auth/refresh')
             .then((res) => {
                 tokenStorage.setAccessToken(res.data.accessToken);
