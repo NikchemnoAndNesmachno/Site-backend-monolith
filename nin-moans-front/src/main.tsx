@@ -5,6 +5,7 @@ import App from './App';
 import {createRoot} from "react-dom/client";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import './index.css';
+import './api/axios-interceptors.ts';
 
 const queryClient = new QueryClient();
 

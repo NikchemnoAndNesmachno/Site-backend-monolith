@@ -1,4 +1,11 @@
 export type FeedSort = "LATEST" | "POPULAR";
+export type ReactionCode = "LIKE" | "DISLIKE";
+export type ReactionCountsResponse = Partial<Record<ReactionCode, number>>;
+
+export type ViewCountsResponse = {
+    totalViews: number;
+    uniqueViews: number;
+};
 
 export type VideoAuthor = {
     userId: number;
@@ -18,10 +25,30 @@ export type VideoListItem = {
     likesCount: number;
     dislikesCount: number;
     commentsCount: number;
-    myReaction: boolean;
+    myReaction: ReactionCode | null;
     createdAt: string;
     // durationSeconds: number;
     author: VideoAuthor;
+};
+
+export type VideoDetails = {
+    videoId: number;
+    title: string;
+    description: string;
+    videoMediaId: number;
+    videoUrl: string;
+    previewMediaId: number;
+    previewUrl: string;
+    author: VideoAuthor;
+    createdAt: string;
+};
+
+export type ReactionActionResponse = {
+    targetType: string;
+    targetId: number;
+    myReaction: ReactionCode | null;
+    counts: ReactionCountsResponse;
+    updatedAt: string;
 };
 
 export type PageResponse<T> = {
