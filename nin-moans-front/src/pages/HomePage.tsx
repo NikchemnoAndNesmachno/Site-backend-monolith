@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import {Link, useSearchParams} from "react-router-dom";
 import { useVideosPage } from "../hooks/useVideosPage";
 import { VideoGrid } from "../components/VideoGrid";
 import { VideoPagination } from "../components/VideoPagination";
@@ -107,13 +107,16 @@ export function HomePage() {
                             {user ? "Акаунт" : "Гість"}
                         </span>
                         {user ? (
-                            <button
-                                type="button"
-                                className="home-page__logout-button"
-                                onClick={() => void logout()}
-                            >
-                                Logout
-                            </button>
+                            <div className="home-page__profile-actions">
+                                <Link to="/profile" className="home-page__profile-link">Profile</Link>
+                                <button
+                                    type="button"
+                                    className="home-page__logout-button"
+                                    onClick={() => void logout()}
+                                >
+                                    Logout
+                                </button>
+                            </div>
                         ) : null}
                     </div>
 
