@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -65,6 +64,7 @@ public class SecurityConfig {
 
                 p.matcher(HttpMethod.GET, API_V1_MEDIA_BY_ID),
                 p.matcher(HttpMethod.GET, API_V1_MEDIA_BY_ID_META),
+                p.matcher(HttpMethod.GET, API_V1_VIDEO_BY_ID),
 
                 p.matcher(HttpMethod.GET, API_V1_REACTIONS_BY_TARGET_TYPE_BY_TARGET_ID_COUNTS),
 

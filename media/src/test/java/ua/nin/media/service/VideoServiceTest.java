@@ -6,13 +6,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import ua.nin.media.dto.VideoDetailsResponse;
 import ua.nin.media.dto.VideoWithPreviewUploadResponse;
 import ua.nin.media.exception.exceptions.VideoForbiddenDeletionException;
 import ua.nin.media.model.*;
 import ua.nin.media.repository.VideoRepository;
+import ua.nin.media.repository.projection.VideoDetailsProjection;
 
+import java.time.Instant;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +32,30 @@ class VideoServiceTest {
 
     @InjectMocks
     private VideoService videoService;
+
+    @Test
+    void getPublicVideoDetails_mapsResponse() {
+        VideoDetailsProjection projection = new VideoDetailsProjection() {
+            @Override public Long getVideoId() { return 11L; }
+            @Override public String getTitle() { return "Video title"; }
+            @Override public String getDescription() { return "Video description"; }
+            @Override public Long getOwnerUserId() { return 7L; }
+            @Override public String getOwnerUsername() { return "author"; }
+            @Override public String getOwnerDisplayName() { return "Author"; }
+            @Override public Long getOwnerAvatarMediaId() { return 12L; }
+            @Override public Long getVideoMediaId() { return 20L; }
+            @Override public Long getPreviewMediaId() { return 21L; }
+            @Override public Instant getCreatedAt() { return Instant.parse("2026-03-20T12:00:00Z"); }
+        };
+        when(videoRepository.findPublicVideoDetailsById(11L)).thenReturn(Optional.of(projection));
+
+        VideoDetailsResponse response = videoService.getPublicVideoDetails(11L);
+
+        assertThat(response.videoUrl()).isEqualTo("/api/v1/media/20");
+        assertThat(response.previewUrl()).isEqualTo("/api/v1/media/21");
+        assertThat(response.author().avatarUrl()).isEqualTo("/api/v1/media/12");
+        assertThat(response.author().displayName()).isEqualTo("Author");
+    }
 
     @Test
     void uploadVideoWithPreview_createsBundleAndAssets() {

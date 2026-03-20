@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ua.nin.media.dto.VideoDetailsResponse;
 import ua.nin.media.dto.VideoWithPreviewUploadResponse;
 import ua.nin.media.model.VideoVisibility;
 import ua.nin.media.service.VideoService;
@@ -20,6 +21,12 @@ import ua.nin.media.service.VideoService;
 public class VideoController {
 
     private final VideoService videoService;
+
+    @GetMapping("/{videoId}")
+    public ResponseEntity<VideoDetailsResponse> getById(@PathVariable long videoId) {
+        log.debug("Public request for videoId={}", videoId);
+        return ResponseEntity.ok(videoService.getPublicVideoDetails(videoId));
+    }
 
     @PostMapping(value = "/upload/video-with-preview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<VideoWithPreviewUploadResponse> uploadVideoWithPreview(

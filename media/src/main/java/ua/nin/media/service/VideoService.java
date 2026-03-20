@@ -11,11 +11,14 @@ import ua.nin.contract.feed.FeedSort;
 import ua.nin.contract.feed.VideoFeedQueryPort;
 import ua.nin.contract.feed.dto.FeedVideoBaseView;
 import ua.nin.contract.feed.dto.FeedVideoPage;
+import ua.nin.media.dto.VideoDetailsAuthorResponse;
+import ua.nin.media.dto.VideoDetailsResponse;
 import ua.nin.media.dto.VideoWithPreviewUploadResponse;
 import ua.nin.media.exception.exceptions.VideoForbiddenDeletionException;
 import ua.nin.media.exception.exceptions.VideoNotFound;
 import ua.nin.media.model.*;
 import ua.nin.media.repository.VideoRepository;
+import ua.nin.media.repository.projection.VideoDetailsProjection;
 import ua.nin.media.repository.projection.VideoFeedRowProjection;
 
 import java.util.List;
@@ -52,6 +55,30 @@ public class VideoService implements VideoFeedQueryPort {
                 result.getTotalPages(),
                 result.hasNext(),
                 result.hasPrevious()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public VideoDetailsResponse getPublicVideoDetails(long videoId) {
+        VideoDetailsProjection video = videoRepository.findPublicVideoDetailsById(videoId)
+                .orElseThrow(() -> new VideoNotFound(VIDEO_NOT_FOUND));
+
+        return new VideoDetailsResponse(
+                video.getVideoId(),
+                video.getTitle(),
+                video.getDescription(),
+                video.getVideoMediaId(),
+                buildMediaUrl(video.getVideoMediaId()),
+                video.getPreviewMediaId(),
+                buildMediaUrl(video.getPreviewMediaId()),
+                new VideoDetailsAuthorResponse(
+                        video.getOwnerUserId(),
+                        video.getOwnerUsername(),
+                        video.getOwnerDisplayName(),
+                        video.getOwnerAvatarMediaId(),
+                        buildMediaUrl(video.getOwnerAvatarMediaId())
+                ),
+                video.getCreatedAt()
         );
     }
 
@@ -110,5 +137,9 @@ public class VideoService implements VideoFeedQueryPort {
         }
 
         videoRepository.delete(video);
+    }
+
+    private String buildMediaUrl(Long mediaId) {
+        return mediaId == null ? null : "/api/v1/media/" + mediaId;
     }
 }

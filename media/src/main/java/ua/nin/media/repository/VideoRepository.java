@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ua.nin.media.model.Video;
+import ua.nin.media.repository.projection.VideoDetailsProjection;
 import ua.nin.media.repository.projection.VideoFeedRowProjection;
 
 import java.util.Optional;
@@ -78,4 +79,33 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
             """,
             nativeQuery = true)
     Page<VideoFeedRowProjection> findPublicFeedPopular(Pageable pageable);
+
+    @Query(value = """
+            SELECT
+                v.id                    AS videoId,
+                v.title                 AS title,
+                v.description           AS description,
+                v.owner_user_id         AS ownerUserId,
+                p.username              AS ownerUsername,
+                p.display_name          AS ownerDisplayName,
+                a.media_asset_id        AS ownerAvatarMediaId,
+                video_item.media_id     AS videoMediaId,
+                preview_item.media_id   AS previewMediaId,
+                v.created_at            AS createdAt
+            FROM media.videos v
+            JOIN profile.profiles p
+              ON p.user_id = v.owner_user_id
+            LEFT JOIN media.user_avatars a
+              ON a.owner_user_id = v.owner_user_id
+            LEFT JOIN media.media_bundle_items video_item
+              ON video_item.bundle_id = v.media_bundle_id
+             AND video_item.role = 'VIDEO'
+            LEFT JOIN media.media_bundle_items preview_item
+              ON preview_item.bundle_id = v.media_bundle_id
+             AND preview_item.role = 'PREVIEW'
+            WHERE v.id = :videoId
+              AND v.visibility = 'PUBLIC'
+              AND v.status = 'READY'
+            """, nativeQuery = true)
+    Optional<VideoDetailsProjection> findPublicVideoDetailsById(Long videoId);
 }
