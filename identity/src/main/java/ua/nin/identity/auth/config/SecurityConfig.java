@@ -156,12 +156,12 @@ public class SecurityConfig {
 
                         // все інше — за замовчуванням закрите
                         .anyRequest().hasAnyRole(ADMIN)
-                )
-                // JWT access token validation
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.decoder(jwtDecoder)
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter))
                 );
+                // JWT access token validation
+//                .oauth2ResourceServer(oauth2 -> oauth2
+//                        .jwt(jwt -> jwt.decoder(jwtDecoder)
+//                                .jwtAuthenticationConverter(jwtAuthenticationConverter))
+//                );
 
         return http.build();
     }
