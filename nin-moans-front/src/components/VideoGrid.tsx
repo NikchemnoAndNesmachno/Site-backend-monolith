@@ -1,5 +1,5 @@
 import { VideoCard } from "./VideoCard";
-import type {VideoListItem} from "../types/video.ts";
+import type { VideoListItem } from "../types/video.ts";
 
 type Props = {
     videos: VideoListItem[];
@@ -7,7 +7,14 @@ type Props = {
 
 export function VideoGrid({ videos }: Props) {
     if (videos.length === 0) {
-        return <p>No videos found.</p>;
+        return (
+            <div className="video-grid video-grid--empty">
+                <p className="video-grid__empty-title">Відео поки не знайдено.</p>
+                <p className="video-grid__empty-description">
+                    Спробуйте переключити сортування.
+                </p>
+            </div>
+        );
     }
 
     return (

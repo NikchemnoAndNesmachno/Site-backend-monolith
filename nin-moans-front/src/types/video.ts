@@ -1,3 +1,5 @@
+export type FeedSort = "LATEST" | "POPULAR";
+
 export type VideoAuthor = {
     userId: number;
     username: string;

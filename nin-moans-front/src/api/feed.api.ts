@@ -1,9 +1,10 @@
-import type { PageResponse, VideoListItem } from "../types/video.ts";
+import type {FeedSort, PageResponse, VideoListItem} from "../types/video.ts";
 import {axiosPrivate} from "./axios.ts";
 
 export type GetVideosPageParams = {
     page: number;
     size: number;
+    sort: FeedSort;
 };
 
 export async function getVideosPage(params: GetVideosPageParams): Promise<PageResponse<VideoListItem>> {
@@ -11,6 +12,7 @@ export async function getVideosPage(params: GetVideosPageParams): Promise<PageRe
         params: {
             page: params.page,
             size: params.size,
+            sort: params.sort,
         },
     });
 

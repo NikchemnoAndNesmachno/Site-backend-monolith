@@ -1,5 +1,5 @@
 import { useContext, useDebugValue } from "react";
-import { AuthContext } from "../context/AuthContext";
+import {AuthContext} from "../context/AuthContext.tsx";
 
 const useAuth = () => {
     const context = useContext(AuthContext);
