@@ -1,5 +1,5 @@
-import {type FormEvent, useEffect, useMemo, useRef, useState} from "react";
-import { Link, useParams } from "react-router-dom";
+import {useEffect, useMemo, useRef} from "react";
+import {Link, useParams} from "react-router-dom";
 import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import useAuth from "../hooks/useAuth.ts";
 import {
@@ -10,14 +10,14 @@ import {
     putVideoReaction,
     recordVideoView,
 } from "../api/video.api.ts";
-import { createComment, getVideoComments } from "../api/comments.api.ts";
-import type { ReactionCode, ReactionCountsResponse } from "../types/video.ts";
-import { formatViews } from "../utils/formatViews.ts";
-import { BASE_URL } from "../api/axios.ts";
-import { VideoPlayer } from "../components/VideoPlayer";
+import {createComment, getVideoComments} from "../api/comments.api.ts";
+import type {ReactionCode, ReactionCountsResponse} from "../types/video.ts";
+import {BASE_URL} from "../api/axios.ts";
 import "../styles/video.css";
 import extractApiErrorMessage from "../api/extractApiErrorMessage.ts";
-import {CommentThreadItem} from "../components/CommentThreadItem.tsx";
+import {CommentComposer} from "../components/comments/CommentComposer.tsx";
+import {CommentThreadList} from "../components/comments/CommentThreadList.tsx";
+import {VideoHero} from "../components/video/VideoHero.tsx";
 
 function parseVideoId(value: string | undefined): number | null {
     const parsed = Number(value);
@@ -32,19 +32,34 @@ function getReactionCount(counts: ReactionCountsResponse | undefined, code: Reac
     return counts?.[code] ?? 0;
 }
 
+function buildOptimisticCounts(
+    previousCounts: ReactionCountsResponse | undefined,
+    previousReaction: ReactionCode | null,
+    nextReaction: ReactionCode,
+): ReactionCountsResponse {
+    const nextCounts: ReactionCountsResponse = {
+        LIKE: previousCounts?.LIKE ?? 0,
+        DISLIKE: previousCounts?.DISLIKE ?? 0,
+    };
+
+    if (previousReaction && previousReaction !== nextReaction) {
+        nextCounts[previousReaction] = Math.max((nextCounts[previousReaction] ?? 0) - 1, 0);
+    }
+
+    if (previousReaction !== nextReaction) {
+        nextCounts[nextReaction] = (nextCounts[nextReaction] ?? 0) + 1;
+    }
+
+    return nextCounts;
+}
+
 export function VideoPage() {
-    const { videoId: videoIdParam } = useParams();
+    const {videoId: videoIdParam} = useParams();
     const videoId = parseVideoId(videoIdParam);
     const queryClient = useQueryClient();
     const hasRecordedView = useRef(false);
-    const { user } = useAuth();
-    const [commentBody, setCommentBody] = useState("");
-    const [commentError, setCommentError] = useState<string | null>(null);
-    const [optimisticReactionState, setOptimisticReactionState] = useState<{
-        videoId: number;
-        reaction: ReactionCode | null;
-        counts: ReactionCountsResponse;
-    } | null>(null);
+    const {user} = useAuth();
+    const canReact = Boolean(user);
 
     const detailsQuery = useQuery({
         queryKey: ["video", videoId, "details"],
@@ -72,7 +87,7 @@ export function VideoPage() {
 
     const commentsQuery = useInfiniteQuery({
         queryKey: ["video", videoId, "comments", "root"],
-        queryFn: ({ pageParam }) => getVideoComments(videoId!, pageParam, 10),
+        queryFn: ({pageParam}) => getVideoComments(videoId!, pageParam, 10),
         initialPageParam: 0,
         getNextPageParam: (lastPage) => (lastPage.last ? undefined : lastPage.number + 1),
         enabled: videoId !== null,
@@ -81,14 +96,45 @@ export function VideoPage() {
 
     const reactionMutation = useMutation({
         mutationFn: (reactionCode: ReactionCode) => putVideoReaction(videoId!, reactionCode),
+        onMutate: async (reactionCode) => {
+            const countsKey = ["video", videoId, "counts"] as const;
+            const myReactionKey = ["video", videoId, "my-reaction", user?.id] as const;
+
+            await queryClient.cancelQueries({queryKey: countsKey});
+            await queryClient.cancelQueries({queryKey: myReactionKey});
+
+            const previousCounts = queryClient.getQueryData<ReactionCountsResponse>(countsKey);
+            const previousReaction = queryClient.getQueryData<ReactionCode | null>(myReactionKey) ?? null;
+
+            queryClient.setQueryData<ReactionCountsResponse>(
+                countsKey,
+                buildOptimisticCounts(previousCounts, previousReaction, reactionCode),
+            );
+            queryClient.setQueryData<ReactionCode | null>(myReactionKey, reactionCode);
+
+            return {
+                countsKey,
+                myReactionKey,
+                previousCounts,
+                previousReaction,
+            };
+        },
+        onError: (_error, _reactionCode, context) => {
+            if (!context) {
+                return;
+            }
+
+            queryClient.setQueryData(context.countsKey, context.previousCounts);
+            queryClient.setQueryData(context.myReactionKey, context.previousReaction);
+        },
         onSuccess: (response) => {
-            setOptimisticReactionState({
-                videoId: videoId!,
-                reaction: (response.myReaction as ReactionCode | null) ?? null,
-                counts: response.counts,
-            });
-            void queryClient.invalidateQueries({ queryKey: ["video", videoId] });
-            void queryClient.invalidateQueries({ queryKey: ["videos"] });
+            queryClient.setQueryData(["video", videoId, "counts"], response.counts);
+            queryClient.setQueryData(["video", videoId, "my-reaction", user?.id], response.myReaction ?? null);
+        },
+        onSettled: () => {
+            void queryClient.invalidateQueries({queryKey: ["video", videoId, "counts"]});
+            void queryClient.invalidateQueries({queryKey: ["video", videoId, "my-reaction"]});
+            void queryClient.invalidateQueries({queryKey: ["videos"]});
         },
     });
 
@@ -100,13 +146,18 @@ export function VideoPage() {
                 body,
             }),
         onSuccess: () => {
-            setCommentBody("");
-            setCommentError(null);
-            void queryClient.invalidateQueries({ queryKey: ["video", videoId, "comments"] });
-            void queryClient.invalidateQueries({ queryKey: ["videos"] });
+            void queryClient.invalidateQueries({queryKey: ["video", videoId, "comments"]});
+            void queryClient.invalidateQueries({queryKey: ["videos"]});
         },
-        onError: (error) => {
-            setCommentError(extractApiErrorMessage(error));
+    });
+
+    const recordViewMutation = useMutation({
+        mutationFn: (targetVideoId: number) => recordVideoView(targetVideoId),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({queryKey: ["video", videoId, "views"]});
+        },
+        onError: () => {
+            hasRecordedView.current = false;
         },
     });
 
@@ -114,26 +165,6 @@ export function VideoPage() {
         hasRecordedView.current = false;
     }, [videoId]);
 
-    useEffect(() => {
-        if (!videoId || hasRecordedView.current || !detailsQuery.data) {
-            return;
-        }
-
-        hasRecordedView.current = true;
-        void recordVideoView(videoId)
-            .then(() => queryClient.invalidateQueries({ queryKey: ["video", videoId, "views"] }))
-            .catch(() => {
-                hasRecordedView.current = false;
-            });
-    }, [detailsQuery.data, queryClient, videoId]);
-
-    const hasOptimisticState = optimisticReactionState?.videoId === videoId;
-    const activeReaction = hasOptimisticState
-        ? optimisticReactionState?.reaction ?? null
-        : (myReactionQuery.data ?? null);
-    const counts = hasOptimisticState
-        ? optimisticReactionState?.counts
-        : countsQuery.data;
     const authorName = useMemo(() => {
         const author = detailsQuery.data?.author;
         if (!author) {
@@ -166,100 +197,46 @@ export function VideoPage() {
     const posterUrl = details.previewUrl ? `${BASE_URL}${details.previewUrl}` : null;
     const sourceUrl = `${BASE_URL}${details.videoUrl}`;
     const avatarUrl = details.author.avatarUrl ? `${BASE_URL}${details.author.avatarUrl}` : null;
-    const likes = getReactionCount(counts, "LIKE");
-    const dislikes = getReactionCount(counts, "DISLIKE");
+    const activeReaction = myReactionQuery.data ?? null;
+    const likes = getReactionCount(countsQuery.data, "LIKE");
+    const dislikes = getReactionCount(countsQuery.data, "DISLIKE");
 
     function handleReactionClick(reactionCode: ReactionCode) {
-        reactionMutation.mutate(reactionCode);
-    }
-
-    function handleCommentSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-
-        const trimmed = commentBody.trim();
-        if (!trimmed) {
-            setCommentError("Comment cannot be empty.");
+        if (!canReact) {
             return;
         }
 
-        setCommentError(null);
-        createCommentMutation.mutate(trimmed);
+        reactionMutation.mutate(reactionCode);
+    }
+
+    function handlePlaybackStart() {
+        if (!videoId || hasRecordedView.current || recordViewMutation.isPending) {
+            return;
+        }
+
+        hasRecordedView.current = true;
+        recordViewMutation.mutate(videoId);
     }
 
     return (
         <main className="video-page">
-            <section className="video-page__hero-card">
-                <div className="video-page__nav-row">
-                    <Link to="/" className="video-page__back-link">
-                        ← Back to feed
-                    </Link>
-                    <span className="video-page__badge">Video details</span>
-                </div>
-
-                <div className="video-page__layout">
-                    <div className="video-page__player-column">
-                        <VideoPlayer src={sourceUrl} poster={posterUrl} title={details.title} />
-                    </div>
-
-                    <aside className="video-page__sidebar">
-                        <div className="video-page__author-card">
-                            <div className="video-page__author-row">
-                                <div className="video-page__avatar">
-                                    {avatarUrl ? (
-                                        <img src={avatarUrl} alt={authorName} className="video-page__avatar-image" />
-                                    ) : (
-                                        <span>{authorName.charAt(0).toUpperCase()}</span>
-                                    )}
-                                </div>
-
-                                <div>
-                                    <p className="video-page__eyebrow">Creator</p>
-                                    <h2 className="video-page__author-name">{authorName}</h2>
-                                    <p className="video-page__author-username">@{details.author.username}</p>
-                                </div>
-                            </div>
-
-                            <div className="video-page__stats-grid">
-                                <div className="video-page__stat-card">
-                                    <span className="video-page__stat-label">Views</span>
-                                    <strong>{formatViews(viewsQuery.data?.totalViews ?? 0)}</strong>
-                                </div>
-                                <div className="video-page__stat-card">
-                                    <span className="video-page__stat-label">Likes</span>
-                                    <strong>{likes}</strong>
-                                </div>
-                                <div className="video-page__stat-card">
-                                    <span className="video-page__stat-label">Dislikes</span>
-                                    <strong>{dislikes}</strong>
-                                </div>
-                                <div className="video-page__stat-card">
-                                    <span className="video-page__stat-label">Published</span>
-                                    <strong>{new Date(details.createdAt).toLocaleDateString()}</strong>
-                                </div>
-                            </div>
-
-                            <div className="video-page__reaction-row">
-                                <button
-                                    type="button"
-                                    className={`video-page__reaction-button ${activeReaction === "LIKE" ? "video-page__reaction-button--active" : ""}`}
-                                    onClick={() => handleReactionClick("LIKE")}
-                                    disabled={reactionMutation.isPending}
-                                >
-                                    👍 Like
-                                </button>
-                                <button
-                                    type="button"
-                                    className={`video-page__reaction-button ${activeReaction === "DISLIKE" ? "video-page__reaction-button--active video-page__reaction-button--danger" : "video-page__reaction-button--danger"}`}
-                                    onClick={() => handleReactionClick("DISLIKE")}
-                                    disabled={reactionMutation.isPending}
-                                >
-                                    👎 Dislike
-                                </button>
-                            </div>
-                        </div>
-                    </aside>
-                </div>
-            </section>
+            <VideoHero
+                sourceUrl={sourceUrl}
+                posterUrl={posterUrl}
+                title={details.title}
+                authorName={authorName}
+                username={details.author.username}
+                avatarUrl={avatarUrl}
+                totalViews={viewsQuery.data?.totalViews ?? 0}
+                likes={likes}
+                dislikes={dislikes}
+                createdAt={details.createdAt}
+                activeReaction={activeReaction}
+                canReact={canReact}
+                isReactionPending={reactionMutation.isPending}
+                onReact={handleReactionClick}
+                onPlaybackStart={handlePlaybackStart}
+            />
 
             <section className="video-page__content-card">
                 <p className="video-page__eyebrow">About this video</p>
@@ -283,27 +260,10 @@ export function VideoPage() {
                 </div>
 
                 {user ? (
-                    <form className="video-page__comment-form" onSubmit={handleCommentSubmit}>
-                        <textarea
-                            className="video-page__textarea"
-                            placeholder="Share what you think about this video..."
-                            value={commentBody}
-                            onChange={(event) => setCommentBody(event.target.value)}
-                            maxLength={500}
-                            rows={4}
-                        />
-                        <div className="video-page__form-footer">
-                            <span className="video-page__form-hint">{commentBody.length}/500</span>
-                            <button
-                                type="submit"
-                                className="video-page__primary-button"
-                                disabled={createCommentMutation.isPending}
-                            >
-                                {createCommentMutation.isPending ? "Posting..." : "Post comment"}
-                            </button>
-                        </div>
-                        {commentError ? <p className="video-page__form-error">{commentError}</p> : null}
-                    </form>
+                    <CommentComposer
+                        isSubmitting={createCommentMutation.isPending}
+                        onSubmitComment={(body) => createCommentMutation.mutateAsync(body)}
+                    />
                 ) : (
                     <div className="video-page__login-prompt">
                         <p>Sign in to leave a comment or reply to existing threads.</p>
@@ -314,36 +274,18 @@ export function VideoPage() {
                 )}
 
                 <div className="video-page__comments-list">
-                    {commentsQuery.isLoading ? (
-                        <p className="video-page__comment-state">Loading comments...</p>
-                    ) : commentsQuery.isError ? (
-                        <p className="video-page__form-error">{extractApiErrorMessage(commentsQuery.error)}</p>
-                    ) : rootComments.length > 0 ? (
-                        <>
-                            {rootComments.map((comment) => (
-                                <CommentThreadItem
-                                    key={comment.id}
-                                    comment={comment}
-                                    videoId={videoId}
-                                    currentUserId={user?.id ?? null}
-                                    canReply={Boolean(user)}
-                                />
-                            ))}
-
-                            {commentsQuery.hasNextPage ? (
-                                <button
-                                    type="button"
-                                    className="video-page__comment-action video-page__comment-action--load-more"
-                                    onClick={() => void commentsQuery.fetchNextPage()}
-                                    disabled={commentsQuery.isFetchingNextPage}
-                                >
-                                    {commentsQuery.isFetchingNextPage ? "Loading more..." : "Load more comments"}
-                                </button>
-                            ) : null}
-                        </>
-                    ) : (
-                        <p className="video-page__comment-state">No comments yet. Be the first to start the conversation.</p>
-                    )}
+                    <CommentThreadList
+                        comments={rootComments}
+                        isLoading={commentsQuery.isLoading}
+                        isError={commentsQuery.isError}
+                        errorMessage={commentsQuery.isError ? extractApiErrorMessage(commentsQuery.error) : null}
+                        hasNextPage={Boolean(commentsQuery.hasNextPage)}
+                        isFetchingNextPage={commentsQuery.isFetchingNextPage}
+                        onLoadMore={() => void commentsQuery.fetchNextPage()}
+                        videoId={videoId}
+                        currentUserId={user?.id ?? null}
+                        canReply={Boolean(user)}
+                    />
                 </div>
             </section>
         </main>

@@ -5,6 +5,7 @@ type Props = {
     src: string;
     poster?: string | null;
     title: string;
+    onPlaybackStart?: () => void;
 };
 
 function formatTime(seconds: number) {
@@ -19,8 +20,9 @@ function formatTime(seconds: number) {
     return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
 }
 
-export function VideoPlayer({ src, poster, title }: Props) {
+export function VideoPlayer({ src, poster, title, onPlaybackStart }: Props) {
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const hasNotifiedPlaybackStartRef = useRef(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -28,12 +30,23 @@ export function VideoPlayer({ src, poster, title }: Props) {
     const [isSeeking, setIsSeeking] = useState(false);
 
     useEffect(() => {
+        hasNotifiedPlaybackStartRef.current = false;
+    }, [src]);
+
+    useEffect(() => {
         const video = videoRef.current;
         if (!video) {
             return;
         }
 
-        const syncPlayingState = () => setIsPlaying(!video.paused);
+        const syncPlayingState = () => {
+            setIsPlaying(!video.paused);
+
+            if (!video.paused && !hasNotifiedPlaybackStartRef.current) {
+                hasNotifiedPlaybackStartRef.current = true;
+                onPlaybackStart?.();
+            }
+        };
         const syncMetadata = () => setDuration(video.duration || 0);
         const syncProgress = () => {
             if (!isSeeking) {
@@ -58,7 +71,7 @@ export function VideoPlayer({ src, poster, title }: Props) {
             video.removeEventListener("timeupdate", syncProgress);
             video.removeEventListener("ended", onEnded);
         };
-    }, [isSeeking]);
+    }, [isSeeking, onPlaybackStart]);
 
     const progressPercent = useMemo(() => {
         if (!duration) {

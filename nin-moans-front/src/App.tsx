@@ -21,14 +21,28 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
     return children;
 }
 
+function PublicOnlyRoute({ children }: { children: JSX.Element }) {
+    const { isAuthenticated, isInitializing } = useAuth();
+
+    if (isInitializing) {
+        return <div>Loading auth...</div>;
+    }
+
+    if (isAuthenticated) {
+        return <Navigate to="/" replace />;
+    }
+
+    return children;
+}
+
 export default function App() {
     return (
         <Routes>
             <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-            <Route path="/videos/:videoId" element={<ProtectedRoute><VideoPage /></ProtectedRoute>} />
+            <Route path="/videos/:videoId" element={<VideoPage />} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+            <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
         </Routes>
     );
 }

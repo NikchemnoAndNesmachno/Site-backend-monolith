@@ -1,13 +1,21 @@
-import {Link, useSearchParams} from "react-router-dom";
-import { useVideosPage } from "../hooks/useVideosPage";
-import { VideoGrid } from "../components/VideoGrid";
-import { VideoPagination } from "../components/VideoPagination";
+import {useEffect, useMemo} from "react";
+import {useSearchParams} from "react-router-dom";
+import {useVideosPage} from "../hooks/useVideosPage";
+import {VideoGrid} from "../components/VideoGrid";
+import {VideoPagination} from "../components/VideoPagination";
 import useAuth from "../hooks/useAuth.ts";
-import {useMemo} from "react";
 import type {FeedSort} from "../types/video.ts";
+import {AccountPanel} from "../components/home/AccountPanel.tsx";
+import {FeedToolbar} from "../components/home/FeedToolbar.tsx";
 
 const DEFAULT_PAGE = 0;
+const MIN_PAGE = 0;
+const MAX_PAGE = 10_000;
+
 const DEFAULT_SIZE = 20;
+const MIN_SIZE = 1;
+const MAX_SIZE = 50;
+
 const DEFAULT_SORT: FeedSort = "LATEST";
 
 const SORT_OPTIONS: Array<{ value: FeedSort; label: string; description: string }> = [
@@ -23,53 +31,98 @@ const SORT_OPTIONS: Array<{ value: FeedSort; label: string; description: string 
     },
 ];
 
-function parsePositiveInt(value: string | null, fallback: number): number {
-    if (!value) return fallback;
+type ParsedNumberParam = {
+    value: number;
+    wasNormalized: boolean;
+};
 
-    const parsed = Number(value);
-    if (!Number.isInteger(parsed) || parsed < 0) {
-        return fallback;
-    }
-
-    return parsed;
+function clampNumber(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
 }
 
-function parseSort(value: string | null): FeedSort {
-    return value === "POPULAR" || value === "LATEST" ? value : DEFAULT_SORT;
+function parseIntParam(
+    rawValue: string | null,
+    fallback: number,
+    min: number,
+    max: number,
+): ParsedNumberParam {
+    if (rawValue === null) {
+        return { value: fallback, wasNormalized: false };
+    }
+
+    const parsed = Number(rawValue);
+    if (!Number.isInteger(parsed)) {
+        return { value: fallback, wasNormalized: true };
+    }
+
+    const clamped = clampNumber(parsed, min, max);
+    return {
+        value: clamped,
+        wasNormalized: clamped !== parsed,
+    };
+}
+
+function parseSortParam(rawSort: string | null): { value: FeedSort; wasNormalized: boolean } {
+    if (rawSort === null) {
+        return { value: DEFAULT_SORT, wasNormalized: false };
+    }
+
+    if (rawSort === "POPULAR" || rawSort === "LATEST") {
+        return { value: rawSort, wasNormalized: false };
+    }
+
+    return { value: DEFAULT_SORT, wasNormalized: true };
+}
+
+function buildSearchParams(page: number, size: number, sort: FeedSort) {
+    return {
+        page: String(page),
+        size: String(size),
+        sort,
+    };
 }
 
 export function HomePage() {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const page = parsePositiveInt(searchParams.get("page"), DEFAULT_PAGE);
-    const size = parsePositiveInt(searchParams.get("size"), DEFAULT_SIZE);
-    const sort = parseSort(searchParams.get("sort"));
+    const pageParam = parseIntParam(searchParams.get("page"), DEFAULT_PAGE, MIN_PAGE, MAX_PAGE);
+    const sizeParam = parseIntParam(searchParams.get("size"), DEFAULT_SIZE, MIN_SIZE, MAX_SIZE);
+    const sortParam = parseSortParam(searchParams.get("sort"));
 
-    const { data, isPending, isError, error, isFetching } = useVideosPage(page, size, sort);
+    const page = pageParam.value;
+    const size = sizeParam.value;
+    const sort = sortParam.value;
 
-    //////////////////
-    const { user, logout, isInitializing } = useAuth();
+    useEffect(() => {
+        if (!pageParam.wasNormalized && !sizeParam.wasNormalized && !sortParam.wasNormalized) {
+            return;
+        }
+
+        setSearchParams(buildSearchParams(page, size, sort), { replace: true });
+    }, [
+        page,
+        pageParam.wasNormalized,
+        setSearchParams,
+        size,
+        sizeParam.wasNormalized,
+        sort,
+        sortParam.wasNormalized,
+    ]);
+
+    const {data, isPending, isError, error, isFetching} = useVideosPage(page, size, sort);
+    const {user, logout} = useAuth();
 
     const currentSortOption = useMemo(
         () => SORT_OPTIONS.find((option) => option.value === sort) ?? SORT_OPTIONS[1],
         [sort],
     );
 
-    if (isInitializing) {
-        return <div className="home-page__status">Loading auth...</div>;
-    }
-    /////////////////////////////////
-
     function updateSearchParams(nextPage: number, nextSort = sort) {
-        setSearchParams({
-            page: String(nextPage),
-            size: String(size),
-            sort: nextSort,
-        });
+        setSearchParams(buildSearchParams(nextPage, size, nextSort));
     }
 
     function handlePageChange(nextPage: number) {
-        updateSearchParams(nextPage);
+        updateSearchParams(clampNumber(nextPage, MIN_PAGE, MAX_PAGE));
     }
 
     function handleSortChange(nextSort: FeedSort) {
@@ -101,66 +154,17 @@ export function HomePage() {
                     </p>
                 </div>
 
-                <aside className="home-page__profile-card">
-                    <div className="home-page__profile-header">
-                        <span className="home-page__profile-badge">
-                            {user ? "Акаунт" : "Гість"}
-                        </span>
-                        {user ? (
-                            <div className="home-page__profile-actions">
-                                <Link to="/profile" className="home-page__profile-link">Profile</Link>
-                                <button
-                                    type="button"
-                                    className="home-page__logout-button"
-                                    onClick={() => void logout()}
-                                >
-                                    Logout
-                                </button>
-                            </div>
-                        ) : null}
-                    </div>
-
-                    {user ? (
-                        <div className="home-page__profile-details">
-                            <strong>{user.email}</strong>
-                            <span>ID: {user.id}</span>
-                            <span>Role: {user.role}</span>
-                        </div>
-                    ) : (
-                        <p className="home-page__guest-copy">
-                            Увійдіть в акаунт, щоб взаємодіяти з відео і бачити персональні
-                            дані профілю.
-                        </p>
-                    )}
-                </aside>
+                <AccountPanel user={user!} onLogout={() => void logout()} />
             </section>
 
             <section className="feed-panel">
-                <header className="feed-panel__header">
-                    <div>
-                        <h2 className="feed-panel__title">Стрічка відео</h2>
-                        <p className="feed-panel__description">{currentSortOption.description}</p>
-                    </div>
-
-                    <div className="feed-panel__actions">
-                        {isFetching ? <span className="feed-panel__updating">Updating...</span> : null}
-
-                        <label className="feed-panel__sort-control">
-                            <span className="feed-panel__sort-label">Сортування</span>
-                            <select
-                                className="feed-panel__sort-select"
-                                value={sort}
-                                onChange={(event) => handleSortChange(event.target.value as FeedSort)}
-                            >
-                                {SORT_OPTIONS.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                    </div>
-                </header>
+                <FeedToolbar
+                    description={currentSortOption.description}
+                    isFetching={isFetching}
+                    sort={sort}
+                    sortOptions={SORT_OPTIONS}
+                    onSortChange={handleSortChange}
+                />
 
                 <VideoGrid videos={data?.items ?? []} />
 

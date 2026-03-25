@@ -957,3 +957,12 @@
         padding-left: 0.85rem;
     }
 }
+.video-page__reaction-hint {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #aab3d6;
+}
+
+.video-page__reaction-hint a {
+    color: #d8dfff;
+}
