@@ -1,18 +1,24 @@
-import { useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {useEffect, useMemo, useState} from "react";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useForm} from "react-hook-form";
 import useAuth from "../hooks/useAuth.ts";
-import { getMyProfile, updateMyProfile } from "../api/profile.api.ts";
-import type { PrivacySetting, ProfileResponse, UpdateProfileRequest } from "../types/profile.ts";
+import {getMyProfile, updateMyProfile} from "../api/profile.api.ts";
+import type {PrivacySetting, ProfileResponse, UpdateProfileRequest} from "../types/profile.ts";
+import {profileEditSchema, type ProfileEditFormValues} from "../validation/profileSchemas.ts";
+import {ProfileHeroCard} from "../components/profile/ProfileHeroCard.tsx";
+import {ProfileSummaryCard} from "../components/profile/ProfileSummaryCard.tsx";
+import {ProfileEditForm} from "../components/profile/ProfileEditForm.tsx";
+import extractApiErrorMessage from "../api/extractApiErrorMessage.ts";
 import "../styles/profile.css";
 
 const PRIVACY_OPTIONS: Array<{ value: PrivacySetting; label: string; description: string }> = [
-    { value: "PUBLIC", label: "Public", description: "Профіль бачать всі" },
-    { value: "FRIENDS_ONLY", label: "Friends only", description: "Профіль можуть побачити лише люди зі списку друзів" },
-    { value: "PRIVATE", label: "Private", description: "Профіль прихований від інших" },
+    { value: "PUBLIC", label: "Public", description: "Your profile is visible to everyone" },
+    { value: "FRIENDS_ONLY", label: "Friends only", description: "Only your friends can view the profile" },
+    { value: "PRIVATE", label: "Private", description: "Your profile is hidden from everyone else" },
 ];
 
-function createDraft(profile: ProfileResponse): UpdateProfileRequest {
+function mapProfileToForm(profile: ProfileResponse): ProfileEditFormValues {
     return {
         username: profile.username ?? "",
         displayName: profile.displayName ?? "",
@@ -23,38 +29,74 @@ function createDraft(profile: ProfileResponse): UpdateProfileRequest {
     };
 }
 
-function formatDate(value: string | null) {
-    if (!value) {
-        return "—";
-    }
-
-    return new Date(value).toLocaleString();
+function mapFormToUpdatePayload(values: ProfileEditFormValues): UpdateProfileRequest {
+    return {
+        username: values.username,
+        displayName: values.displayName,
+        bio: values.bio,
+        privacy: values.privacy,
+        locale: values.locale,
+        timezone: values.timezone,
+    };
 }
 
 export function ProfilePage() {
     const queryClient = useQueryClient();
-    const { user, logout } = useAuth();
-    const [draft, setDraft] = useState<UpdateProfileRequest | null>(null);
+    const {user, logout} = useAuth();
+    const [isEditing, setIsEditing] = useState(false);
 
     const profileQuery = useQuery({
         queryKey: ["profile", "me"],
         queryFn: getMyProfile,
     });
 
+    const {
+        register,
+        handleSubmit,
+        reset,
+        watch,
+        formState: {errors},
+    } = useForm<ProfileEditFormValues>({
+        resolver: zodResolver(profileEditSchema),
+        mode: "onSubmit",
+        defaultValues: {
+            username: "",
+            displayName: "",
+            bio: "",
+            privacy: "PUBLIC",
+            locale: "",
+            timezone: "",
+        },
+    });
+
     const updateMutation = useMutation({
         mutationFn: updateMyProfile,
-        onSuccess: (profile) => {
-            queryClient.setQueryData(["profile", "me"], profile);
-            setDraft(null);
+        onSuccess: (nextProfile) => {
+            queryClient.setQueryData(["profile", "me"], nextProfile);
+            reset(mapProfileToForm(nextProfile));
+            setIsEditing(false);
         },
     });
 
     const profile = profileQuery.data;
-    const activeDraft = draft ?? (profile ? createDraft(profile) : null);
-    const selectedPrivacy = useMemo(
-        () => PRIVACY_OPTIONS.find((option) => option.value === (activeDraft?.privacy ?? "PUBLIC")),
-        [activeDraft?.privacy],
-    );
+
+    useEffect(() => {
+        if (!profile) {
+            return;
+        }
+
+        reset(mapProfileToForm(profile));
+    }, [profile, reset]);
+
+    const bioLength = watch("bio")?.length ?? 0;
+
+    const submitError = useMemo(() => {
+        if (!updateMutation.isError) {
+            return null;
+        }
+
+        return extractApiErrorMessage(updateMutation.error);
+    }, [updateMutation.error, updateMutation.isError]);
 
     if (profileQuery.isPending) {
         return <div className="profile-page__status">Loading profile...</div>;
@@ -64,180 +106,46 @@ export function ProfilePage() {
         return <div className="profile-page__status profile-page__status--error">Failed to load profile.</div>;
     }
 
-    function handleFieldChange<K extends keyof UpdateProfileRequest>(field: K, value: UpdateProfileRequest[K]) {
-        setDraft({
-            ...createDraft(profile!),
-            ...draft,
-            [field]: value,
-        });
+    const resolvedProfile = profile;
+
+    function handleEnterEditMode() {
+        reset(mapProfileToForm(resolvedProfile));
+        setIsEditing(true);
     }
 
-    function handleCancel() {
-        setDraft(null);
+    function handleCancelEditMode() {
+        reset(mapProfileToForm(resolvedProfile));
+        setIsEditing(false);
     }
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        if (!activeDraft) {
-            return;
-        }
-
-        updateMutation.mutate(activeDraft);
+    function onSubmit(values: ProfileEditFormValues) {
+        const payload = mapFormToUpdatePayload(values);
+        updateMutation.mutate(payload);
     }
 
     return (
         <main className="profile-page">
-            <section className="profile-page__hero-card">
-                <div className="profile-page__nav-row">
-                    <Link to="/" className="profile-page__back-link">← Back to feed</Link>
-                    <span className="profile-page__badge">Profile</span>
-                </div>
-
-                <div className="profile-page__hero-content">
-                    <div>
-                        <p className="profile-page__eyebrow">Account overview</p>
-                        <h1 className="profile-page__title">{profile.displayName || profile.username}</h1>
-                        <p className="profile-page__subtitle">@{profile.username}</p>
-                        <p className="profile-page__bio">{profile.bio || "Додайте bio, щоб профіль виглядав більш живим."}</p>
-                    </div>
-
-                    <div className="profile-page__hero-actions">
-                        <button
-                            type="button"
-                            className="profile-page__secondary-button"
-                            onClick={() => setDraft(createDraft(profile))}
-                        >
-                            Edit profile
-                        </button>
-                        <button
-                            type="button"
-                            className="profile-page__ghost-button"
-                            onClick={() => void logout()}
-                        >
-                            Logout
-                        </button>
-                    </div>
-                </div>
-            </section>
+            <ProfileHeroCard
+                profile={resolvedProfile}
+                isEditing={isEditing}
+                onEdit={handleEnterEditMode}
+                onLogout={() => void logout()}
+            />
 
             <section className="profile-page__layout">
-                <aside className="profile-page__summary-card">
-                    <div className="profile-page__summary-block">
-                        <span className="profile-page__section-label">Identity</span>
-                        <strong>{user?.email}</strong>
-                        <span>Role: {user?.role}</span>
-                        <span>User ID: {profile.userId}</span>
-                    </div>
+                <ProfileSummaryCard profile={resolvedProfile} user={user} privacyOptions={PRIVACY_OPTIONS} />
 
-                    <div className="profile-page__summary-block">
-                        <span className="profile-page__section-label">Visibility</span>
-                        <strong>{selectedPrivacy?.label}</strong>
-                        <span>{selectedPrivacy?.description}</span>
-                    </div>
-
-                    <div className="profile-page__summary-grid">
-                        <div className="profile-page__summary-item">
-                            <span>Locale</span>
-                            <strong>{profile.locale || "—"}</strong>
-                        </div>
-                        <div className="profile-page__summary-item">
-                            <span>Timezone</span>
-                            <strong>{profile.timezone || "—"}</strong>
-                        </div>
-                        <div className="profile-page__summary-item">
-                            <span>Created</span>
-                            <strong>{formatDate(profile.createdAt)}</strong>
-                        </div>
-                        <div className="profile-page__summary-item">
-                            <span>Updated</span>
-                            <strong>{formatDate(profile.updatedAt)}</strong>
-                        </div>
-                    </div>
-                </aside>
-
-                <section className="profile-page__editor-card">
-                    <div className="profile-page__editor-header">
-                        <div>
-                            <p className="profile-page__section-label">Profile settings</p>
-                            <h2 className="profile-page__editor-title">Редагування профілю</h2>
-                        </div>
-                        {draft ? (
-                            <button type="button" className="profile-page__ghost-button" onClick={handleCancel}>
-                                Cancel
-                            </button>
-                        ) : null}
-                    </div>
-
-                    <form className="profile-page__form" onSubmit={handleSubmit}>
-                        <label className="profile-page__field">
-                            <span>Username</span>
-                            <input
-                                value={activeDraft?.username ?? ""}
-                                onChange={(event) => handleFieldChange("username", event.target.value)}
-                                placeholder="username"
-                            />
-                        </label>
-
-                        <label className="profile-page__field">
-                            <span>Display name</span>
-                            <input
-                                value={activeDraft?.displayName ?? ""}
-                                onChange={(event) => handleFieldChange("displayName", event.target.value)}
-                                placeholder="Display name"
-                            />
-                        </label>
-
-                        <label className="profile-page__field profile-page__field--full">
-                            <span>Bio</span>
-                            <textarea
-                                rows={5}
-                                value={activeDraft?.bio ?? ""}
-                                onChange={(event) => handleFieldChange("bio", event.target.value)}
-                                placeholder="Розкажіть що-небудь про себе"
-                            />
-                        </label>
-
-                        <label className="profile-page__field">
-                            <span>Privacy</span>
-                            <select
-                                value={activeDraft?.privacy ?? "PUBLIC"}
-                                onChange={(event) => handleFieldChange("privacy", event.target.value as PrivacySetting)}
-                            >
-                                {PRIVACY_OPTIONS.map((option) => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
-                        </label>
-
-                        <label className="profile-page__field">
-                            <span>Locale</span>
-                            <input
-                                value={activeDraft?.locale ?? ""}
-                                onChange={(event) => handleFieldChange("locale", event.target.value)}
-                                placeholder="en / uk"
-                            />
-                        </label>
-
-                        <label className="profile-page__field">
-                            <span>Timezone</span>
-                            <input
-                                value={activeDraft?.timezone ?? ""}
-                                onChange={(event) => handleFieldChange("timezone", event.target.value)}
-                                placeholder="Europe/Kyiv"
-                            />
-                        </label>
-
-                        <div className="profile-page__form-actions">
-                            <button type="submit" className="profile-page__primary-button" disabled={updateMutation.isPending}>
-                                {updateMutation.isPending ? "Saving..." : "Save changes"}
-                            </button>
-                        </div>
-
-                        {updateMutation.isError ? (
-                            <p className="profile-page__form-error">Failed to save profile changes.</p>
-                        ) : null}
-                    </form>
-                </section>
+                <ProfileEditForm
+                    isEditing={isEditing}
+                    isSubmitting={updateMutation.isPending}
+                    bioLength={bioLength}
+                    errors={errors}
+                    register={register}
+                    privacyOptions={PRIVACY_OPTIONS}
+                    submitError={submitError}
+                    onCancel={handleCancelEditMode}
+                    onSubmit={handleSubmit(onSubmit)}
+                />
             </section>
         </main>
     );

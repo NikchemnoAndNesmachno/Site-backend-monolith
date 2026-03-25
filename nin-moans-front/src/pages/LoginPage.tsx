@@ -1,23 +1,28 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import useAuth from "../hooks/useAuth.ts";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {useLocation} from "react-router-dom";
 import {useLoginMutation} from "../hooks/useLoginMutation.ts";
 import {type LoginFormValues, loginSchema} from "../validation/authSchemas.ts";
-import {useLocation} from "react-router-dom";
 import extractApiErrorMessage from "../api/extractApiErrorMessage.ts";
+import {AuthPageLayout} from "../components/auth/AuthPageLayout.tsx";
+import {AuthCard} from "../components/auth/AuthCard.tsx";
+import {AuthFieldError} from "../components/auth/AuthFieldError.tsx";
 
 export default function LoginPage() {
-    const { isAuthenticated } = useAuth();
     const loginMutation = useLoginMutation();
     const location = useLocation();
 
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormValues>({
+    const {
+        register,
+        handleSubmit,
+        formState: {errors, isSubmitting},
+    } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
-            email: '',
-            password: '',
+            email: "",
+            password: "",
         },
-        mode: 'onSubmit',
+        mode: "onSubmit",
     });
 
     const onSubmit = async (data: LoginFormValues) => {
@@ -26,96 +31,61 @@ export default function LoginPage() {
 
     const serverError = loginMutation.error
         ? extractApiErrorMessage(loginMutation.error)
-        : '';
+        : "";
 
     const successMessage =
-        location.state && (location.state as { registered?: boolean }).registered
-            ? 'Registration completed. Now log in.'
-            : '';
-
-    if (isAuthenticated) {
-        return <div>Ви вже увійшли.</div>;
-    }
+        location.state && (location.state as {registered?: boolean}).registered
+            ? "Registration completed. Please sign in."
+            : "";
 
     return (
-        <div style={containerStyle}>
-            <form onSubmit={handleSubmit(onSubmit)} style={formStyle} noValidate>
-                <h1>Login</h1>
+        <AuthPageLayout>
+            <AuthCard title="Sign in">
+                <form onSubmit={handleSubmit(onSubmit)} className="auth-form" noValidate>
+                    <label className="auth-form__label">
+                        Email
+                        <input
+                            type="email"
+                            maxLength={64}
+                            autoComplete="email"
+                            className="auth-form__input"
+                            {...register("email", {
+                                onChange: () => {
+                                    if (loginMutation.isError) {
+                                        loginMutation.reset();
+                                    }
+                                },
+                            })}
+                        />
+                        <AuthFieldError message={errors.email?.message} />
+                    </label>
 
-                <label style={labelStyle}>
-                    Email
-                    <input
-                        type="email"
-                        maxLength={64}
-                        style={inputStyle}
-                        {...register('email')}
-                    />
-                    {errors.email && <div style={errorStyle}>{errors.email.message}</div>}
-                </label>
+                    <label className="auth-form__label">
+                        Password
+                        <input
+                            type="password"
+                            maxLength={72}
+                            autoComplete="current-password"
+                            className="auth-form__input"
+                            {...register("password", {
+                                onChange: () => {
+                                    if (loginMutation.isError) {
+                                        loginMutation.reset();
+                                    }
+                                },
+                            })}
+                        />
+                        <AuthFieldError message={errors.password?.message} />
+                    </label>
 
-                <label style={labelStyle}>
-                    Password
-                    <input
-                        type="password"
-                        maxLength={72}
-                        style={inputStyle}
-                        {...register('password')}
-                    />
-                    {errors.password && <div style={errorStyle}>{errors.password.message}</div>}
-                </label>
+                    <AuthFieldError message={serverError} />
+                    {successMessage ? <p className="auth-form__success">{successMessage}</p> : null}
 
-                {serverError && <div style={errorStyle}>{serverError}</div>}
-                {successMessage && <div style={successStyle}>{successMessage}</div>}
-
-                <button type="submit" disabled={isSubmitting} style={buttonStyle}>
-                    {isSubmitting ? 'Logging in...' : 'Login'}
-                </button>
-            </form>
-        </div>
+                    <button type="submit" disabled={isSubmitting} className="auth-form__button">
+                        {isSubmitting ? "Signing in..." : "Sign in"}
+                    </button>
+                </form>
+            </AuthCard>
+        </AuthPageLayout>
     );
 }
-
-const containerStyle: React.CSSProperties = {
-    minHeight: '100vh',
-    display: 'grid',
-    placeItems: 'center',
-    padding: '24px',
-};
-
-const formStyle: React.CSSProperties = {
-    width: '100%',
-    maxWidth: '420px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-    padding: '24px',
-    border: '1px solid #ccc',
-    borderRadius: '12px',
-};
-
-const labelStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-};
-
-const inputStyle: React.CSSProperties = {
-    padding: '10px 12px',
-    fontSize: '16px',
-};
-
-const buttonStyle: React.CSSProperties = {
-    padding: '12px',
-    fontSize: '16px',
-    cursor: 'pointer',
-};
-
-const errorStyle: React.CSSProperties = {
-    color: 'crimson',
-    fontSize: '14px',
-};
-
-const successStyle: React.CSSProperties = {
-    color: 'green',
-    fontSize: '14px',
-};

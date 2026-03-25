@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import {usernameSchema} from "./sharedSchemas.ts";
 
 export const loginSchema = z.object({
     email: z
@@ -19,9 +20,7 @@ export const registerSchema = z
             .min(1, 'Email is required'),
         username: z
             .string()
-            .trim()
-            .min(3, 'Username must be at least 3 characters')
-            .max(64, 'Username must be at most 64 characters'),
+            .pipe(usernameSchema),
         password: z
             .string()
             .min(8, 'Password must be at least 8 characters')

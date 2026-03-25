@@ -163,6 +163,23 @@
     flex-basis: 100%;
 }
 
+.profile-page__field-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: baseline;
+}
+
+.profile-page__form-hint {
+    color: #aab3d6;
+    font-size: 0.85rem;
+}
+
+.profile-page__field-error {
+    color: #ffb5c7;
+    font-size: 0.85rem;
+}
+
 .profile-page__field input,
 .profile-page__field select,
 .profile-page__field textarea,
@@ -201,6 +218,33 @@
 .profile-page__form-error {
     margin: 0;
     color: #ffb5c7;
+}
+
+.profile-page__read-mode {
+    margin-top: 1.5rem;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 1rem;
+}
+
+.profile-page__read-mode-copy,
+.profile-page__read-mode-hint {
+    margin: 0;
+}
+
+.profile-page__read-mode-hint {
+    margin-top: 0.5rem;
+    color: #aab3d6;
+}
+
+.profile-page__primary-button:disabled,
+.profile-page__secondary-button:disabled,
+.profile-page__ghost-button:disabled,
+.profile-page__field input:disabled,
+.profile-page__field select:disabled,
+.profile-page__field textarea:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .profile-page__status {
