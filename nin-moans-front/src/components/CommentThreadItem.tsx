@@ -17,7 +17,7 @@ export function CommentThreadItem({ comment, videoId, currentUserId, canReply }:
     const queryClient = useQueryClient();
     const [isReplying, setIsReplying] = useState(false);
     const [showReplies, setShowReplies] = useState(false);
-    const [knownReplyCount, setKnownReplyCount] = useState(0);
+    const [knownReplyCount, setKnownReplyCount] = useState<number | null>(null);
 
     const createReplyMutation = useMutation({
         mutationFn: (body: string) =>

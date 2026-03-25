@@ -1,15 +1,11 @@
 import {z} from "zod";
+import {usernameSchema} from "./sharedSchemas.ts";
 
-const USERNAME_REGEX = /^[a-zA-Z0-9._]{3,32}$/;
 const LOCALE_REGEX = /^[a-z]{2,3}(?:-[A-Z]{2})?$/;
 const IANA_TIMEZONE_REGEX = /^[A-Za-z_]+\/[A-Za-z0-9_+\-]+(?:\/[A-Za-z0-9_+\-]+)?$/;
 
 export const profileEditSchema = z.object({
-    username: z.string()
-        .min(3, "Username must be at least 3 characters.")
-        .max(32, "Username must be 32 characters or fewer.")
-        .transform((value) => value.trim())
-        .refine((value) => USERNAME_REGEX.test(value), "Use letters, numbers, dot, or underscore."),
+    username: z.string().pipe(usernameSchema),
     displayName: z.string()
         .min(1, "Display name is required.")
         .max(80, "Display name must be 80 characters or fewer.")

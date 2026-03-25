@@ -1,7 +1,6 @@
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {Navigate, useLocation} from "react-router-dom";
-import useAuth from "../hooks/useAuth.ts";
+import {useLocation} from "react-router-dom";
 import {useLoginMutation} from "../hooks/useLoginMutation.ts";
 import {type LoginFormValues, loginSchema} from "../validation/authSchemas.ts";
 import extractApiErrorMessage from "../api/extractApiErrorMessage.ts";
@@ -10,7 +9,6 @@ import {AuthCard} from "../components/auth/AuthCard.tsx";
 import {AuthFieldError} from "../components/auth/AuthFieldError.tsx";
 
 export default function LoginPage() {
-    const {isAuthenticated} = useAuth();
     const loginMutation = useLoginMutation();
     const location = useLocation();
 
@@ -39,10 +37,6 @@ export default function LoginPage() {
         location.state && (location.state as {registered?: boolean}).registered
             ? "Registration completed. Please sign in."
             : "";
-
-    if (isAuthenticated) {
-        return <Navigate to="/" replace />;
-    }
 
     return (
         <AuthPageLayout>

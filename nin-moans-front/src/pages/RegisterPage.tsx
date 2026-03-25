@@ -3,14 +3,11 @@ import {type RegisterFormValues, registerSchema} from "../validation/authSchemas
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import extractApiErrorMessage from "../api/extractApiErrorMessage.ts";
-import useAuth from "../hooks/useAuth.ts";
-import {Navigate} from "react-router-dom";
 import {AuthPageLayout} from "../components/auth/AuthPageLayout.tsx";
 import {AuthCard} from "../components/auth/AuthCard.tsx";
 import {AuthFieldError} from "../components/auth/AuthFieldError.tsx";
 
 export default function RegisterPage() {
-    const {isAuthenticated} = useAuth();
     const registerMutation = useRegisterMutation();
 
     const {
@@ -35,10 +32,6 @@ export default function RegisterPage() {
     const serverError = registerMutation.error
         ? extractApiErrorMessage(registerMutation.error)
         : "";
-
-    if (isAuthenticated) {
-        return <Navigate to="/" replace />;
-    }
 
     return (
         <AuthPageLayout>

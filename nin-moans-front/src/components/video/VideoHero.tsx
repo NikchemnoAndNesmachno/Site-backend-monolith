@@ -4,6 +4,7 @@ import {VideoMetaSidebar} from "./VideoMetaSidebar.tsx";
 import type {ReactionCode} from "../../types/video.ts";
 
 type VideoHeroProps = {
+    backTo: string;
     sourceUrl: string;
     posterUrl: string | null;
     title: string;
@@ -22,6 +23,7 @@ type VideoHeroProps = {
 };
 
 export function VideoHero({
+    backTo,
     sourceUrl,
     posterUrl,
     title,
@@ -41,7 +43,7 @@ export function VideoHero({
     return (
         <section className="video-page__hero-card">
             <div className="video-page__nav-row">
-                <Link to="/" className="video-page__back-link">
+                <Link to={backTo} className="video-page__back-link">
                     ← Back to feed
                 </Link>
                 <span className="video-page__badge">Video details</span>

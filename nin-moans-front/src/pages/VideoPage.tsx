@@ -60,6 +60,7 @@ export function VideoPage() {
     const hasRecordedView = useRef(false);
     const {user} = useAuth();
     const canReact = Boolean(user);
+    const backTo = user ? "/" : "/login";
 
     const detailsQuery = useQuery({
         queryKey: ["video", videoId, "details"],
@@ -221,6 +222,7 @@ export function VideoPage() {
     return (
         <main className="video-page">
             <VideoHero
+                backTo={backTo}
                 sourceUrl={sourceUrl}
                 posterUrl={posterUrl}
                 title={details.title}

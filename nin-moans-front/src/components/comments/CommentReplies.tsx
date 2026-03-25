@@ -8,7 +8,7 @@ type CommentRepliesProps = {
     videoId: number;
     parentCommentId: number;
     showReplies: boolean;
-    onReplyCountChange: (count: number) => void;
+    onReplyCountChange: (count: number | null) => void;
     renderReply: (reply: Comment) => ReactNode;
 };
 
@@ -29,7 +29,11 @@ export function CommentReplies({
     });
 
     useEffect(() => {
-        const total = repliesQuery.data?.pages[0]?.totalElements ?? 0;
+        if (!repliesQuery.data) {
+            return;
+        }
+
+        const total = repliesQuery.data.pages[0]?.totalElements ?? 0;
         onReplyCountChange(total);
     }, [onReplyCountChange, repliesQuery.data]);
 

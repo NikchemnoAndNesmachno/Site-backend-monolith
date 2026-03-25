@@ -5,7 +5,7 @@ type CommentCardProps = {
     currentUserId: number | null;
     canReply: boolean;
     showReplies: boolean;
-    knownReplyCount: number;
+    knownReplyCount: number | null;
     onToggleReplies: () => void;
     onToggleReplyComposer: () => void;
 };
@@ -61,7 +61,7 @@ export function CommentCard({
                     onClick={onToggleReplies}
                 >
                     {replyToggleLabel}
-                    {knownReplyCount > 0 ? ` (${knownReplyCount})` : ""}
+                    {knownReplyCount !== null ? ` (${knownReplyCount})` : ""}
                 </button>
 
                 {canReply ? (
