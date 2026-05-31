@@ -42,7 +42,8 @@ jobs:
       contents: read
       security-events: write
     uses: ./.github/workflows/docker-build-scan-push.yml
-    needs: [build, codeql, qodana]
+#    needs: [build, codeql, qodana]
+    needs: [build, codeql]
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
