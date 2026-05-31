@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.nin.contract.feed.ReactionStatsPort;
 import ua.nin.reactions.dto.ReactionActionResponse;
 import ua.nin.reactions.dto.PutReactionRequest;
 import ua.nin.reactions.exception.exceptions.UnknownReactionTypeException;
@@ -12,8 +13,11 @@ import ua.nin.reactions.model.ReactionCount;
 import ua.nin.reactions.repository.ReactionCountRepository;
 import ua.nin.reactions.repository.ReactionRepository;
 import ua.nin.reactions.repository.ReactionTypeRepository;
+import ua.nin.reactions.repository.projection.MyVideoReactionRow;
+import ua.nin.reactions.repository.projection.VideoReactionCountRow;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -31,11 +35,40 @@ import static ua.nin.common.util.StringHelperUtils.normalizeTargetType;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ReactionService {
+public class ReactionService implements ReactionStatsPort {
 
     private final ReactionRepository reactionRepository;
     private final ReactionTypeRepository reactionTypeRepository;
     private final ReactionCountRepository reactionCountRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Long> getReactionCountsByVideoIds(Collection<Long> videoIds, String reactionCode) {
+        if (videoIds == null || videoIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return reactionRepository.findReactionCountsByVideoIds(videoIds, reactionCode).stream()
+                .collect(Collectors.toMap(
+                        VideoReactionCountRow::getVideoId,
+                        VideoReactionCountRow::getCnt
+                ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, String> getMyReactionCodesForVideoIds(long userId, Collection<Long> videoIds) {
+        if (videoIds == null || videoIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return reactionRepository.findMyReactionsByVideoIds(userId, videoIds).stream()
+                .collect(Collectors.toMap(
+                        MyVideoReactionRow::getVideoId,
+                        MyVideoReactionRow::getReactionCode,
+                        (left, right) -> left
+                ));
+    }
 
     @Transactional
     public ReactionActionResponse put(long userId, PutReactionRequest req) {

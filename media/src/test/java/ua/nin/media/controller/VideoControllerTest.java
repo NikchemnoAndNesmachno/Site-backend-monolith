@@ -10,12 +10,17 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ua.nin.media.dto.VideoDetailsAuthorResponse;
+import ua.nin.media.dto.VideoDetailsResponse;
 import ua.nin.media.dto.VideoWithPreviewUploadResponse;
 import ua.nin.media.service.VideoService;
+
+import java.time.Instant;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,6 +39,27 @@ class VideoControllerTest {
     @BeforeEach
     void setup() {
         mockMvc = MockMvcBuilders.standaloneSetup(videoController).build();
+    }
+
+    @Test
+    void getById_returnsResponse() throws Exception {
+        VideoDetailsResponse response = new VideoDetailsResponse(
+                1L,
+                "Title",
+                "Description",
+                10L,
+                "/api/v1/media/10",
+                11L,
+                "/api/v1/media/11",
+                new VideoDetailsAuthorResponse(2L, "author", "Author", 12L, "/api/v1/media/12"),
+                Instant.parse("2026-03-20T12:00:00Z")
+        );
+        when(videoService.getPublicVideoDetails(1L)).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/video/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.videoId").value(1))
+                .andExpect(jsonPath("$.videoUrl").value("/api/v1/media/10"));
     }
 
     @Test

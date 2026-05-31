@@ -46,4 +46,6 @@ public final class StringEndpoints {
     public static final String API_V1_COMMENTS_BY_ID = "/api/v1/comments/{commentId}";
 
     public static final String API_V1_VIEWS = "/api/v1/views";
+
+    public static final String API_V1_FEED = "/api/v1/feed";
 }

@@ -80,6 +80,8 @@ class PublicMatcherParameterizedTest {
                 c(HttpMethod.GET, API_V1_VIEWS, "/api/v1/views"),
                 c(HttpMethod.POST, API_V1_VIEWS, "/api/v1/views"),
 
+                c(HttpMethod.GET, API_V1_FEED, "/api/v1/feed"),
+
                 // OAuth2
                 c(HttpMethod.GET, "/login/oauth2/code/**", "/login/oauth2/code/google"),
                 c(HttpMethod.GET, "/oauth2/authorization/**", "/oauth2/authorization/google"),

@@ -16,9 +16,14 @@ import ua.nin.comments.model.Comment;
 import ua.nin.comments.model.CommentStatus;
 import ua.nin.comments.repository.CommentClosureRepository;
 import ua.nin.comments.repository.CommentRepository;
+import ua.nin.comments.repository.projection.VideoCommentCountRow;
+import ua.nin.contract.feed.CommentStatsPort;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static ua.nin.common.util.StringHelperUtils.normalizeBody;
 import static ua.nin.common.util.StringHelperUtils.normalizeTargetType;
@@ -26,7 +31,7 @@ import static ua.nin.common.util.StringHelperUtils.normalizeTargetType;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CommentService {
+public class CommentService implements CommentStatsPort {
 
     @Value("${comments.max-depth:20}")
     private int maxDepth;
@@ -34,6 +39,20 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentClosureRepository closureRepository;
     private final CommentResponseMapper commentResponseMapper;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Long> getCommentCountsByVideoIds(Collection<Long> videoIds) {
+        if (videoIds == null || videoIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return commentRepository.findCommentCountsByVideoIds(videoIds).stream()
+                .collect(Collectors.toMap(
+                        VideoCommentCountRow::getVideoId,
+                        VideoCommentCountRow::getCnt
+                ));
+    }
 
     @Transactional
     public CommentResponse create(long authorUserId, CreateCommentRequest req) {
