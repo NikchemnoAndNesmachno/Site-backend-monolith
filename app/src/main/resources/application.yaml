@@ -96,8 +96,8 @@ app:
 # Identity token security
 jwt:
   secret: ${JWT_SECRET}
-  secret-base64: false
-  issuer: NiN
+  secret-base64: ${JWT_SECRET_BASE64:false}
+  issuer: ${JWT_ISSUER:NiN}
   access-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES}
 
 security:

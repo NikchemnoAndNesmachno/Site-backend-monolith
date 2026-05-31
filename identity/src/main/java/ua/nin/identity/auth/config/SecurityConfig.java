@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.cors.CorsConfigurationSource;
 import ua.nin.identity.auth.oauth2.state.CookieAuthorizationRequestRepository;
 import ua.nin.identity.auth.service.HttpCookieService;
 import ua.nin.identity.auth.oauth2.handler.OAuth2SuccessHandler;
@@ -64,6 +64,7 @@ public class SecurityConfig {
 
                 p.matcher(HttpMethod.GET, API_V1_MEDIA_BY_ID),
                 p.matcher(HttpMethod.GET, API_V1_MEDIA_BY_ID_META),
+                p.matcher(HttpMethod.GET, API_V1_VIDEO_BY_ID),
 
                 p.matcher(HttpMethod.GET, API_V1_REACTIONS_BY_TARGET_TYPE_BY_TARGET_ID_COUNTS),
 
@@ -72,6 +73,8 @@ public class SecurityConfig {
 
                 p.matcher(HttpMethod.GET, API_V1_VIEWS),
                 p.matcher(HttpMethod.POST, API_V1_VIEWS),
+
+                p.matcher(HttpMethod.GET, API_V1_FEED),
 
                 p.matcher(HttpMethod.GET, "/login/oauth2/code/**"),
                 p.matcher(HttpMethod.GET, "/oauth2/authorization/**"),
@@ -88,13 +91,13 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain publicChain(HttpSecurity http, RequestMatcher publicMatcher) throws Exception {
+    public SecurityFilterChain publicChain(HttpSecurity http, RequestMatcher publicMatcher, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http.securityMatcher(publicMatcher)
                 // REST API -> CSRF зазвичай вимикають, бо немає server-side session.
                 // Refresh cookie в такій схемі теж ок, але якщо хочеш "максимально строго" —
                 // можемо додати CSRF token тільки для /auth/refresh.
 
-                .cors(Customizer.withDefaults())
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a.anyRequest().permitAll())
@@ -103,6 +106,10 @@ public class SecurityConfig {
                                 .authorizationRequestRepository(authorizationRequestRepository())
                         )
                         .successHandler(oAuth2SuccessHandler)
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.decoder(jwtDecoder)
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter))
                 );
 
         return http.build();
@@ -110,9 +117,9 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
-    public SecurityFilterChain protectedChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain protectedChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
-                .cors(Customizer.withDefaults())
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

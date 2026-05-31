@@ -64,7 +64,7 @@ class AuthControllerTest {
     @Test
     void login_setsRefreshCookie() throws Exception {
         LoginRequest request = new LoginRequest("user@site.com", "password123");
-        AuthResponse response = new AuthResponse("access", "Bearer", 600L, 1L, "USER");
+        AuthResponse response = new AuthResponse("access", "Bearer", 600L, 1L, "user@gmail.com", "USER");
         when(authService.login(any(LoginRequest.class), any(), any()))
                 .thenReturn(new AuthResult(response, "refresh-token"));
 
@@ -80,7 +80,7 @@ class AuthControllerTest {
 
     @Test
     void refresh_rotatesRefreshCookie() throws Exception {
-        AuthResponse response = new AuthResponse("new-access", "Bearer", 600L, 1L, "USER");
+        AuthResponse response = new AuthResponse("new-access", "Bearer", 600L, 1L, "user@gmail.com", "USER");
         when(authService.refresh(any(), any(), any())).thenReturn(new AuthResult(response, "new-refresh-token"));
 
         mockMvc.perform(post("/api/v1/auth/refresh")

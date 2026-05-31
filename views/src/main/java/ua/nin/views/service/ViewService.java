@@ -5,18 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ua.nin.contract.feed.ViewStatsPort;
 import ua.nin.views.dto.ViewCountsResponse;
 import ua.nin.views.exception.exceptions.ViewerKeyHashException;
 import ua.nin.views.mapper.ViewCountsResponseMapper;
 import ua.nin.views.model.ViewCount;
 import ua.nin.views.repository.ViewCountRepository;
 import ua.nin.views.repository.ViewUniqueRepository;
+import ua.nin.views.repository.projection.VideoViewCountRow;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ua.nin.common.util.StringHelperUtils.normalizeTargetType;
 
@@ -32,7 +37,7 @@ viewer key = "g:" + ip + "|" + userAgent (і обов'язково pepper/salt)
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ViewService {
+public class ViewService implements ViewStatsPort {
 
     private final ViewUniqueRepository uniqueRepo;
     private final ViewCountRepository countRepo;
@@ -43,6 +48,20 @@ public class ViewService {
 
     @Value("${views.viewer.pepper:CHANGE_ME}")
     private String pepper;
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, Long> getViewCountsByVideoIds(Collection<Long> videoIds) {
+        if (videoIds == null || videoIds.isEmpty()) {
+            return Map.of();
+        }
+
+        return countRepo.findViewCountsByVideoIds(videoIds).stream()
+                .collect(Collectors.toMap(
+                        VideoViewCountRow::getVideoId,
+                        VideoViewCountRow::getViewsCount
+                ));
+    }
 
     @Transactional
     public void recordView(String targetType, long targetId, Long userId, String userAgent, String ip) {

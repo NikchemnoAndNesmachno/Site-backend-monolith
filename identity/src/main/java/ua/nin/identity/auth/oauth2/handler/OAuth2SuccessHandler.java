@@ -45,7 +45,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             Authentication authentication) throws IOException {
 
         // 1. Отримання провайдера
-        String provider;
+        String  provider;
         OAuth2AuthenticationToken token  = (OAuth2AuthenticationToken) authentication;
         provider = token.getAuthorizedClientRegistrationId();
         //-------------------------------------- Other providers (GitHub for example) -----------------
@@ -99,6 +99,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 "Bearer",
                 accessTtlMinutes * 60,
                 user.getId(),
+                user.getEmail(),
                 role
         );
 

@@ -86,7 +86,7 @@ public class RefreshTokenService {
         Instant now = Instant.now();
         String hash = timeTokenUtils.hash(rawRefreshToken);
 
-        RefreshToken current = refreshTokenRepository.findByTokenHash(hash)
+        RefreshToken current = refreshTokenRepository.findByTokenHashForUpdate(hash)
                 .orElseThrow(() -> new InvalidRefreshTokenException("Refresh token not found"));
 
         // 1) family must be active

@@ -83,7 +83,7 @@ class RefreshTokenServiceTest {
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .build();
-        when(refreshTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
+        when(refreshTokenRepository.findByTokenHashForUpdate("hash")).thenReturn(Optional.of(token));
 
         RefreshTokenFamily family = RefreshTokenFamily.builder()
                 .id(10L)
@@ -104,7 +104,7 @@ class RefreshTokenServiceTest {
                 .issuedAt(Instant.now().minus(10, ChronoUnit.DAYS))
                 .expiresAt(Instant.now().minus(1, ChronoUnit.DAYS))
                 .build();
-        when(refreshTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
+        when(refreshTokenRepository.findByTokenHashForUpdate("hash")).thenReturn(Optional.of(token));
 
         RefreshTokenFamily family = RefreshTokenFamily.builder()
                 .id(10L)
@@ -128,7 +128,7 @@ class RefreshTokenServiceTest {
                 .expiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .revokedAt(Instant.now())
                 .build();
-        when(refreshTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
+        when(refreshTokenRepository.findByTokenHashForUpdate("hash")).thenReturn(Optional.of(token));
 
         RefreshTokenFamily family = RefreshTokenFamily.builder()
                 .id(10L)
@@ -158,7 +158,7 @@ class RefreshTokenServiceTest {
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(1, ChronoUnit.DAYS))
                 .build();
-        when(refreshTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
+        when(refreshTokenRepository.findByTokenHashForUpdate("hash")).thenReturn(Optional.of(token));
 
         RefreshTokenFamily family = RefreshTokenFamily.builder()
                 .id(10L)
