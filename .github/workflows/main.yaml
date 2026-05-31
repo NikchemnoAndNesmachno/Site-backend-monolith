@@ -34,7 +34,7 @@ jobs:
       checks: write
     uses: ./.github/workflows/qodana_code_quality.yml
     secrets:
-      QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1016867356 }}
+      QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 
   docker:
     permissions:
