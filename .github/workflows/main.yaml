@@ -27,14 +27,15 @@ jobs:
       contents: read
     uses: ./.github/workflows/codeql.yml
 
-  qodana:
-    permissions:
-      contents: read
-      pull-requests: write
-      checks: write
-    uses: ./.github/workflows/qodana_code_quality.yml
-    secrets:
-      QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+# Disabled due to license expiration, will be re-enabled when renewed
+#  qodana:
+#    permissions:
+#      contents: read
+#      pull-requests: write
+#      checks: write
+#    uses: ./.github/workflows/qodana_code_quality.yml
+#    secrets:
+#      QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_1016867356 }}
 
   docker:
     permissions:
