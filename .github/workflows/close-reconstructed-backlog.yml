@@ -1,0 +1,35 @@
+name: Close remaining reconstructed backlog
+
+on:
+  push:
+    paths:
+      - .github/workflows/close-reconstructed-backlog.yml
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  close-backlog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Close remaining reconstructed backlog items
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for issue_number in $(seq 145 402); do
+            curl --fail-with-body --silent --show-error \
+              --retry 8 --retry-all-errors --retry-delay 5 \
+              --request PATCH \
+              --url "https://api.github.com/repos/${REPOSITORY}/issues/${issue_number}" \
+              --header "Authorization: Bearer ${GH_TOKEN}" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              --data '{"state":"closed","state_reason":"completed"}' \
+              > /dev/null
+            sleep 1
+          done
