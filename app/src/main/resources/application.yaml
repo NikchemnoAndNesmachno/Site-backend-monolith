@@ -23,7 +23,7 @@ spring:
   # Hibernate
   jpa:
     hibernate.ddl-auto: validate
-    show-sql: true
+    show-sql: ${HIBERNATE_SHOW_SQL:false}
     properties:
       hibernate:
         jdbc:
@@ -38,7 +38,7 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
-      mail.debug: true
+      mail.debug: ${MAIL_DEBUG:false}
   security:
     oauth2:
       client:
@@ -72,21 +72,13 @@ spring:
 # Logging
 logging:
   level:
-#    org.springframework.security: DEBUG
-    org.eclipse.angus.mail: DEBUG
-    org.springframework.mail: DEBUG
-    ua.nin: DEBUG
-    root: INFO
-
-    # Security chain, matchers, decisions, auth failures
-    org.springframework.security: TRACE
-
-    # MVC dispatching, handler mapping, exception resolvers
-    org.springframework.web: TRACE
-    org.springframework.web.servlet: TRACE
-
-    # Filter registration/order at startup
-    web: DEBUG
+    root: ${ROOT_LOG_LEVEL:INFO}
+    ua.nin: ${APP_LOG_LEVEL:INFO}
+    org.eclipse.angus.mail: ${MAIL_LOG_LEVEL:INFO}
+    org.springframework.mail: ${MAIL_LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:INFO}
+    org.springframework.web: ${WEB_LOG_LEVEL:INFO}
+    org.springframework.web.servlet: ${WEB_LOG_LEVEL:INFO}
 
 app:
   mail:
