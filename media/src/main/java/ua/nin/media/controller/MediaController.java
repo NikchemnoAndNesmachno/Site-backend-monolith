@@ -40,7 +40,7 @@ public class MediaController {
         log.debug("Request to download meta by ID: {}", mediaId);
         MediaAsset asset = mediaService.getAssetOrThrow(mediaId);
 
-        InputStreamResource body = new InputStreamResource(mediaService.open(mediaId));
+        InputStreamResource body = new InputStreamResource(mediaService.open(asset));
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + safeFilename(asset.getOriginalFilename(), mediaId) + "\"")
