@@ -16,10 +16,12 @@ import ua.nin.views.repository.projection.VideoViewCountRow;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -42,9 +44,6 @@ public class ViewService implements ViewStatsPort {
     private final ViewUniqueRepository uniqueRepo;
     private final ViewCountRepository countRepo;
     private final ViewCountsResponseMapper viewCountsResponseMapper;
-
-    @Value("${views.unique.bucket:DAY}") // DAY only for MVP
-    private String bucketMode;
 
     @Value("${views.viewer.pepper:CHANGE_ME}")
     private String pepper;
@@ -88,6 +87,9 @@ public class ViewService implements ViewStatsPort {
         String tType = normalizeTargetType(targetType);
 
         ViewCount viewCount = countRepo.findCountsByTarget(tType, targetId);
+        if (viewCount == null) {
+            return new ViewCountsResponse(tType, targetId, 0L, 0L, null);
+        }
 
         return viewCountsResponseMapper.toDto(viewCount);
     }
@@ -108,10 +110,8 @@ public class ViewService implements ViewStatsPort {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder(digest.length * 2);
-            for (byte b : digest) sb.append(String.format("%02x", b));
-            return sb.toString();
-        } catch (Exception e) {
+            return HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException e) {
             log.error("Hash viewer key error {}", e.getMessage(), e);
             throw new ViewerKeyHashException("Cannot hash viewer key", e);
         }
