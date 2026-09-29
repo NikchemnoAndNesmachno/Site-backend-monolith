@@ -91,6 +91,29 @@ class AuthServiceTest {
     }
 
     @Test
+    void registerUserTest_normalizesUsername() {
+        RegisterRequest request = RegisterRequest.builder()
+                .email("user@example.com")
+                .username("  Mixed_Case  ")
+                .password("password123")
+                .build();
+
+        when(userRepository.existsByEmail("user@example.com")).thenReturn(false);
+        when(profileRepository.existsByUsername("mixed_case")).thenReturn(false);
+        when(passwordEncoder.encode("password123")).thenReturn("encoded");
+        doAnswer(inv -> {
+            User user = inv.getArgument(0, User.class);
+            user.setId(42L);
+            return user;
+        }).when(userRepository).save(any(User.class));
+
+        authService.register(request);
+
+        verify(profileRepository).existsByUsername("mixed_case");
+        verify(profileCreation).createProfile(42L, "mixed_case");
+    }
+
+    @Test
     void registerUserTest_success() {
         RegisterRequest request = mockRequest();
 
@@ -174,8 +197,10 @@ class AuthServiceTest {
                 .isInstanceOf(BadCredentialsException.class)
                 .hasMessageContaining("Invalid credentials");
 
+        assertEquals(1, cred.getFailedLoginAttempts());
         verify(userRepository).findByEmail("user@site.com");
         verify(credentialRepository).findById(user.getId());
+        verify(credentialRepository).save(cred);
         verify(passwordEncoder).matches("bad-pass", "hash");
         verifyNoInteractions(refreshTokenService, accessTokenService);
     }
@@ -193,7 +218,8 @@ class AuthServiceTest {
                 .user(user)
                 .userId(user.getId())
                 .passwordHash("hash")
-                .failedLoginAttempts(0)
+                .failedLoginAttempts(3)
+                .lockUntil(java.time.Instant.parse("2026-10-01T00:00:00Z"))
                 .build();
 
         when(userRepository.findByEmail("user@site.com")).thenReturn(Optional.of(user));
@@ -209,7 +235,10 @@ class AuthServiceTest {
         assertEquals("refresh-token", result.refreshToken());
         assertEquals(12L, result.authResponse().userId());
         assertEquals("USER", result.authResponse().role());
+        assertEquals(0, cred.getFailedLoginAttempts());
+        assertNull(cred.getLockUntil());
 
+        verify(credentialRepository).save(cred);
         verify(userRepository).save(user);
     }
 

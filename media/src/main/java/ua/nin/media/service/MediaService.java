@@ -91,8 +91,10 @@ public class MediaService {
 
     @Transactional(readOnly = true)
     public InputStream open(long id) {
-        MediaAsset asset = assetRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new MediaNotFoundException(MEDIA_NOT_FOUND));
+        return open(getAssetOrThrow(id));
+    }
+
+    public InputStream open(MediaAsset asset) {
         try {
             return storage.open(asset.getStorageKey());
         } catch (Exception ex) {

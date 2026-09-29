@@ -89,7 +89,7 @@ public class PasswordService {
         }
 
         String hash = timeTokenUtils.hash(rawToken);
-        PasswordResetToken token = passwordResetTokenRepository.findByTokenHash(hash)
+        PasswordResetToken token = passwordResetTokenRepository.findByTokenHashForUpdate(hash)
                 .orElseThrow(() -> new InvalidTokenException("Invalid reset token"));
 
         Instant now = Instant.now();

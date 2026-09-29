@@ -99,7 +99,7 @@ class PasswordServiceTest {
                 .tokenHash("hash")
                 .expiresAt(Instant.now().minus(2, ChronoUnit.MINUTES))
                 .build();
-        when(passwordResetTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
+        when(passwordResetTokenRepository.findByTokenHashForUpdate("hash")).thenReturn(Optional.of(token));
 
         assertThatThrownBy(() -> passwordService.reset("raw", "new"))
                 .isInstanceOf(TokenExpiredException.class)
@@ -123,7 +123,7 @@ class PasswordServiceTest {
                 .failedLoginAttempts(2)
                 .build();
 
-        when(passwordResetTokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
+        when(passwordResetTokenRepository.findByTokenHashForUpdate("hash")).thenReturn(Optional.of(token));
         when(credentialRepository.findById(10L)).thenReturn(Optional.of(credential));
         when(passwordEncoder.encode("newPass")).thenReturn("encoded");
 
