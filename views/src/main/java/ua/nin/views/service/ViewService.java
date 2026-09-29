@@ -45,7 +45,7 @@ public class ViewService implements ViewStatsPort {
     private final ViewCountRepository countRepo;
     private final ViewCountsResponseMapper viewCountsResponseMapper;
 
-    @Value("${views.viewer.pepper:CHANGE_ME}")
+    @Value("${views.viewer.pepper}")
     private String pepper;
 
     @Override
