@@ -95,7 +95,7 @@ jwt:
 security:
   refresh:
     ttl-days: 14
-    secure: false
+    secure: ${REFRESH_COOKIE_SECURE:false}
   ott:
     bytes: 32
     pepper: ${OTT_PEPPER}
@@ -111,3 +111,7 @@ media:
       root: ./storage/media
   limits:
     max-size-bytes: 104857600
+
+views:
+  viewer:
+    pepper: ${VIEWER_PEPPER:${OTT_PEPPER}}
