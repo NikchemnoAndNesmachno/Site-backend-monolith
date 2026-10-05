@@ -44,6 +44,11 @@
 
     <properties>
         <java.version>25</java.version>
+
+        <!-- Security patch overrides until included in the Spring Boot BOM -->
+        <tomcat.version>11.0.25</tomcat.version>
+        <jackson-bom.version>3.1.7</jackson-bom.version>
+
         <sentry.version>8.59.0</sentry.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <springdoc.version>3.1.1</springdoc.version>
