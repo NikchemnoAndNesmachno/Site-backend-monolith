@@ -1,7 +1,7 @@
 package ua.nin.identity.auth.oauth2.handler;
 
 import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ class OAuth2SuccessHandlerTest {
     @Mock private RefreshTokenService refreshTokenService;
     @Mock private HttpCookieService cookieService;
 
-    private ObjectMapper objectMapper;
+    private JsonMapper objectMapper;
     private OAuth2SuccessHandler handler;
 
     @Captor private ArgumentCaptor<OAuth2UserDto> oauthDtoCaptor;
@@ -49,7 +49,7 @@ class OAuth2SuccessHandlerTest {
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
+        objectMapper = JsonMapper.builder().build();
         handler = new OAuth2SuccessHandler(
                 provisionService,
                 accessTokenService,
