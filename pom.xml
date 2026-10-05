@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.14</version>
+        <version>4.1.1</version>
         <relativePath/>
     </parent>
 
@@ -43,18 +43,21 @@
     </modules>
 
     <properties>
-        <java.version>21</java.version>
-        <sentry.version>8.27.0</sentry.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <springdoc.version>2.8.0</springdoc.version>
-        <apache.commons.validator.version>1.10.1</apache.commons.validator.version>
-        <apache.hibernate.utils.types>3.14.1</apache.hibernate.utils.types>
+        <java.version>25</java.version>
 
-        <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
-        <jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
+        <!-- Security patch overrides until included in the Spring Boot BOM -->
+        <tomcat.version>11.0.25</tomcat.version>
+        <jackson-bom.version>3.1.7</jackson-bom.version>
+
+        <sentry.version>8.59.0</sentry.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
+        <springdoc.version>3.1.1</springdoc.version>
+        <apache.commons.validator.version>1.10.1</apache.commons.validator.version>
+
+        <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
+        <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
 
         <org.apache.commons-lang3.version>3.18.0</org.apache.commons-lang3.version>
-        <jackson-core.version>2.21.1</jackson-core.version>
         <org.apache.commons-compress.version>1.28.0</org.apache.commons-compress.version>
         <nimbus-jose-jwt.version>10.8</nimbus-jose-jwt.version>
 
@@ -114,23 +117,9 @@
             </dependency>
 
             <dependency>
-                <groupId>io.hypersistence</groupId>
-                <artifactId>hypersistence-utils-hibernate-63</artifactId>
-                <version>${apache.hibernate.utils.types}</version>
-                <scope>compile</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${org.apache.commons-lang3.version}</version>
-                <scope>compile</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson-core.version}</version>
                 <scope>compile</scope>
             </dependency>
 

@@ -1,6 +1,6 @@
 package ua.nin.identity.profile.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +27,7 @@ class ProfileControllerTest {
 
     MockMvc mockMvc;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    JsonMapper objectMapper = JsonMapper.builder().build();
 
     @Mock
     ProfileService profileService;
