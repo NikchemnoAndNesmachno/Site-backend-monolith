@@ -1,7 +1,7 @@
 package ua.nin.identity.auth.oauth2.state;
 
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,7 +28,7 @@ public class CookieAuthorizationRequestRepository implements
     public static final String OAUTH2_PATH = "/";
 
     private static final int COOKIE_MAX_AGE_SECONDS = 180;
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final JsonMapper MAPPER = JsonMapper.builder().build();
 
     private final TimeTokenUtils timeTokenUtils;
     private final HttpCookieService httpCookieService;
