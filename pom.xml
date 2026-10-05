@@ -48,7 +48,6 @@
         <mapstruct.version>1.6.3</mapstruct.version>
         <springdoc.version>3.1.1</springdoc.version>
         <apache.commons.validator.version>1.10.1</apache.commons.validator.version>
-        <apache.hibernate.utils.types>3.16.0</apache.hibernate.utils.types>
 
         <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
         <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
@@ -109,13 +108,6 @@
                 <groupId>commons-validator</groupId>
                 <artifactId>commons-validator</artifactId>
                 <version>${apache.commons.validator.version}</version>
-                <scope>compile</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>io.hypersistence</groupId>
-                <artifactId>hypersistence-utils-hibernate-71</artifactId>
-                <version>${apache.hibernate.utils.types}</version>
                 <scope>compile</scope>
             </dependency>
 
