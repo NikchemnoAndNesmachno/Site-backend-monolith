@@ -46,7 +46,7 @@
         <java.version>25</java.version>
         <sentry.version>8.59.0</sentry.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <springdoc.version>3.0.0</springdoc.version>
+        <springdoc.version>3.1.1</springdoc.version>
         <apache.commons.validator.version>1.10.1</apache.commons.validator.version>
         <apache.hibernate.utils.types>3.16.0</apache.hibernate.utils.types>
 
