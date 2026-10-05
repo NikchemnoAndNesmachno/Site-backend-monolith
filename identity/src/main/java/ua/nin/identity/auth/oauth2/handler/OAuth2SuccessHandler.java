@@ -1,6 +1,6 @@
 package ua.nin.identity.auth.oauth2.handler;
 
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final AccessTokenService accessTokenService;
     private final RefreshTokenService refreshTokenService;
     private final HttpCookieService cookieService;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper objectMapper;
 
     @Value("${jwt.access-ttl-minutes:10}")
     private long accessTtlMinutes;
