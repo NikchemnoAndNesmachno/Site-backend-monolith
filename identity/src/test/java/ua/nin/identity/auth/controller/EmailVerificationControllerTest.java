@@ -1,6 +1,6 @@
 package ua.nin.identity.auth.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ class EmailVerificationControllerTest {
 
     MockMvc mockMvc;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    JsonMapper objectMapper = JsonMapper.builder().build();
 
     @Mock
     EmailVerificationService emailVerificationService;
