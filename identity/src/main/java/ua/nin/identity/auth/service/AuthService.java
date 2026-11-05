@@ -16,11 +16,11 @@ import ua.nin.identity.auth.model.Status;
 import ua.nin.identity.auth.model.User;
 import ua.nin.identity.auth.repository.CredentialRepository;
 import ua.nin.identity.auth.repository.UserRepository;
-import ua.nin.common.util.StringHelperUtils;
 import ua.nin.identity.profile.repository.ProfileRepository;
 
 import static ua.nin.common.constant.ErrorMessage.*;
 import static ua.nin.common.util.StringHelperUtils.normalizeEmail;
+import static ua.nin.common.util.StringHelperUtils.normalizeUsername;
 
 import java.time.Instant;
 import java.util.List;
@@ -48,8 +48,8 @@ public class AuthService {
     // ---------------- REGISTER ----------------
     @Transactional
     public void register(@Valid RegisterRequest req) {
-        String email = StringHelperUtils.normalizeEmail(req.email());
-        String username = req.username().trim();
+        String email = normalizeEmail(req.email());
+        String username = normalizeUsername(req.username());
 
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException(EMAIL_ALREADY_EXISTS);
@@ -80,7 +80,7 @@ public class AuthService {
     }
 
     // ---------------- LOGIN ----------------
-    @Transactional
+    @Transactional(noRollbackFor = BadCredentialsException.class)
     public AuthResult login(@Valid LoginRequest req, String userAgent, String ip) {
         String email = normalizeEmail(req.email());
 
@@ -96,7 +96,14 @@ public class AuthService {
 
         if (!passwordEncoder.matches(req.password(), cred.getPasswordHash())) {
             cred.incrementFailedLoginAttempts();
+            credentialRepository.save(cred);
             throw new BadCredentialsException(INVALID_CREDENTIALS);
+        }
+
+        if (cred.getFailedLoginAttempts() == null || cred.getFailedLoginAttempts() != 0 || cred.getLockUntil() != null) {
+            cred.setFailedLoginAttempts(0);
+            cred.setLockUntil(null);
+            credentialRepository.save(cred);
         }
 
         // optional: last_login_at

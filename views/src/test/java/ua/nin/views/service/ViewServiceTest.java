@@ -60,6 +60,20 @@ class ViewServiceTest {
     }
 
     @Test
+    void getCounts_missingTarget_returnsZeroCounts() {
+        when(countRepo.findCountsByTarget("VIDEO", 99L)).thenReturn(null);
+
+        ViewCountsResponse result = viewService.getCounts("video", 99L);
+
+        assertEquals("VIDEO", result.targetType());
+        assertEquals(99L, result.targetId());
+        assertEquals(0L, result.totalViews());
+        assertEquals(0L, result.uniqueViews());
+        assertNull(result.updatedAt());
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
     void recordView_usesPepper() {
         ReflectionTestUtils.setField(viewService, "pepper", "pepper");
         when(uniqueRepo.insertUniqueIfAbsent(anyString(), anyLong(), anyString(), any(), any())).thenReturn(1);

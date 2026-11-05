@@ -47,7 +47,7 @@ public class EmailVerificationService {
         }
 
         String hash = timeTokenUtils.hash(rawToken);
-        EmailVerificationToken token = tokenRepository.findByTokenHash(hash)
+        EmailVerificationToken token = tokenRepository.findByTokenHashForUpdate(hash)
                 .orElseThrow(() -> new InvalidTokenException("Invalid verification token"));
 
         Instant now = Instant.now();

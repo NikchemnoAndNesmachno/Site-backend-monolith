@@ -41,7 +41,7 @@ public class UserAvatarService {
     }
 
     @Transactional
-    public void deleteAvatar(long avatarId, long userId) {
+    public void deleteAvatar(long userId, long avatarId) {
         if (avatarId != userId) {
             throw new AvatarForbiddenDeletionException(USER_NOT_ALLOWED_TO_DELETE_AVATAR);
         }
