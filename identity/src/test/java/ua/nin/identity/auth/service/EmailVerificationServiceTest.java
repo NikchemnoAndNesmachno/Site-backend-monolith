@@ -55,7 +55,7 @@ class EmailVerificationServiceTest {
                 .tokenHash("hash")
                 .expiresAt(Instant.now().minus(5, ChronoUnit.MINUTES))
                 .build();
-        when(tokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
+        when(tokenRepository.findByTokenHashForUpdate("hash")).thenReturn(Optional.of(token));
 
         assertThatThrownBy(() -> emailVerificationService.verify("raw"))
                 .isInstanceOf(TokenExpiredException.class)
@@ -73,7 +73,7 @@ class EmailVerificationServiceTest {
                 .expiresAt(Instant.now().plus(5, ChronoUnit.MINUTES))
                 .build();
 
-        when(tokenRepository.findByTokenHash("hash")).thenReturn(Optional.of(token));
+        when(tokenRepository.findByTokenHashForUpdate("hash")).thenReturn(Optional.of(token));
 
         emailVerificationService.verify("raw");
 

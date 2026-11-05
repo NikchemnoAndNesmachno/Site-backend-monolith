@@ -76,7 +76,7 @@ class MediaControllerTest {
                 .sizeBytes(4L)
                 .build();
         when(mediaService.getAssetOrThrow(1L)).thenReturn(asset);
-        when(mediaService.open(1L)).thenReturn(new ByteArrayInputStream("data".getBytes()));
+        when(mediaService.open(asset)).thenReturn(new ByteArrayInputStream("data".getBytes()));
 
         mockMvc.perform(get("/api/v1/media/1"))
                 .andExpect(status().isOk())
